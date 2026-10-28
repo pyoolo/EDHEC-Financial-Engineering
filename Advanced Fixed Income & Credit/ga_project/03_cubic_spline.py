@@ -9,10 +9,10 @@ Methodology choices (documented per the assignment's instructions):
   - Knots: exactly the 5 maturities given in the instructions (2,5,10,15,20y).
     We do NOT add extra knots at the very short end (e.g. 1y) or beyond 20y,
     to stay within the letter of the assignment; this means the spline is
-    extrapolated (flat, using the boundary slope) outside [2,20]y.
+    extrapolated by continuing the first/last cubic polynomial outside [2,20]y.
   - Boundary condition: "natural" cubic spline (zero second derivative at the
-    two end knots) -- the standard default and the one implicitly assumed
-    whenever a boundary condition is not otherwise specified.
+    two end knots), explicitly chosen consistently with the course's natural
+    spline. SciPy's default boundary condition is instead "not-a-knot".
   - We fit on the BOOTSTRAPPED yields from Q1.1 (not on Deutsche Bank's model
     yields), since Q2.1 asks for a spline on "the zero-coupon yields obtained
     in Q1.1".
@@ -32,10 +32,10 @@ assert len(knots) == 5, f"Expected 5 knots, found {len(knots)}"
 
 cs = CubicSpline(knots['Years'].values, knots['ZeroYield_BEY'].values, bc_type='natural')
 
-# Evaluate the spline at every maturity we bootstrapped (0.5y steps), but only
-# WITHIN the knot range [2,20]y is the spline a genuine interpolation; outside
-# that range CubicSpline linearly extrapolates using the boundary derivative,
-# which we flag clearly in the comparison table/plot.
+# Evaluate the spline at every bootstrapped maturity (0.5y steps).
+# Inside [2,20]y, interpolate between the five selected knots.
+# Outside [2,20]y, continue the first/last cubic polynomial.
+# This interpolation does not statistically estimate or remove pricing noise.
 curve['SplineYield'] = cs(curve['Years'])
 curve['InKnotRange'] = curve['Years'].between(2, 20)
 curve.to_csv('outputs/q2_spline_vs_bootstrap.csv', index=False)
