@@ -183,8 +183,9 @@ validity, not a riskless arbitrage in the classical sense.
 
 \textbf{Methodology.} Natural cubic spline (zero second derivative at the
 boundary knots) through the five knots specified (2, 5, 10, 15, 20 years),
-fit directly on the Q1.1 bootstrapped BEY yields. Outside $[2,20]$y the
-spline is extrapolated using its boundary slope.
+fit directly on the Q1.1 bootstrapped BEY yields. Natural endpoints are an
+explicit modelling choice, not SciPy's default. Outside $[2,20]$y the first
+or last cubic polynomial is continued; the tails are not generally linear.
 
 \begin{figure}[h]
 \centering
@@ -192,24 +193,30 @@ spline is extrapolated using its boundary slope.
 \caption{Cubic spline (red) vs. raw bootstrapped zero yields (grey dots). Shaded regions are extrapolated.}
 \end{figure}
 
-\textbf{Fit quality.} Within the knot range $[2,20]$y: mean residual
-$=-5.50$\,bps, std $=8.28$\,bps, max $|$residual$| = 29.91$\,bps. The
-residuals are \emph{not} randomly scattered: the largest errors cluster
-sharply between 7.5 and 13 years (up to $-30$\,bps at 11.5Y), exactly the
-maturity window in which Exhibit 1 contains several legacy, high-coupon
-bonds issued in the early 1980s (coupons of 13.25\%, 12.5\%, 11.25\%,
-10.625\%). These bonds plausibly carry idiosyncratic pricing noise (age,
-liquidity, possible embedded optionality/callability common to that
-vintage), which the raw bootstrap faithfully reproduces pointwise but which
-the smooth spline, by construction, averages away.
+\textbf{Fit quality.} For the 37 observations within $[2,20]$y, including
+the five anchors, the residual (spline minus bootstrap) has mean
+$-5.50$\,bps, sample standard deviation $8.28$\,bps and maximum absolute
+value $29.91$\,bps, attained at 11.5Y with a negative sign.
+The spline interpolates five selected yields exactly; it does not
+statistically estimate or average away noise. The high-coupon bonds cited
+in Exhibit 1 mature at 10.5--12Y, so they cannot determine earlier 6--9Y
+bootstrap yields in a successive-substitution procedure. The supplied
+evidence does not establish issuance vintage, liquidity or callability as
+the cause of the residuals.
 
 %--------------------------------------------------------------------
 \question{Q2.2 --- Does using the spline change the Q1.2 conclusions?}
 
+Spline estimates are useful at maturities without an observed point and
+when a continuous curve is required for valuation or scenario analysis.
+Replacing available market-implied yields with a five-anchor approximation
+is a modelling choice; the spline does not exactly reprice all input bonds.
+
 We repeat the Q1.2 comparison using the \textbf{spline-implied} yield
-(instead of the raw bootstrap) at every maturity used in the original
-table, since the spline value differs from the raw bootstrap except
-exactly at the five knots (2,5,10,15,20).
+instead of the bootstrap. The spline must match the five anchors
+(2,5,10,15,20Y) and may differ elsewhere. The table retains BUY/SELL as
+\emph{conditional, model-based labels}, with the Q1.2 reporting band:
+these are comparisons of curve estimates against DB, not new market quotes.
 
 \begin{table}[h]
 \centering
@@ -219,7 +226,7 @@ exactly at the five knots (2,5,10,15,20).
 Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Changed vs. Q1.2?} \\
 \midrule
 1  & 1.2443\% & 1.2846\% & $+4.03$  & BUY  & \textbf{YES} (was SELL) \\
-2  & 1.8727\% & 1.8727\% & $+0.02$  & fair & no (knot) \\
+2  & 1.8727\% & 1.8727\% & $+0.00$  & fair & no (knot) \\
 3  & 2.4110\% & 2.4608\% & $+4.98$  & BUY  & no \\
 4  & 2.9665\% & 3.0096\% & $+4.31$  & BUY  & no \\
 5  & 3.4454\% & 3.4799\% & $+3.45$  & BUY  & no (knot) \\
@@ -241,26 +248,24 @@ Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Ch
 Two distinct mechanisms are at work:
 
 \begin{enumerate}[leftmargin=1.4em]
-\item \textbf{Extrapolation risk (1Y and 25Y).} These two points lie
-\emph{outside} the spline's knot range $[2,20]$y. The natural spline's
-boundary-slope extrapolation is a pure modelling artifact with no claim to
-describing the true curve shape beyond the data used to fit it, so any
-signal built on it is unreliable almost by definition.
-\item \textbf{Belly-of-curve smoothing (6--9Y).} This is the more
-substantive finding. The original Q1.2 ``cheap'' signal in 6--9Y was driven,
-at least in part, by the \emph{same} idiosyncratic legacy-bond noise
-identified in Q2.1's residual analysis. Once the spline smooths through
-that local bump, the belly of the curve actually looks \emph{expensive}, not
-cheap, relative to the DB model.
+\item \textbf{Extrapolation risk (1Y and 25Y).} These points are outside
+$[2,20]$y. Their spline estimates depend on end-cubic continuation, so the
+resulting comparisons require explicit tail assumptions; extrapolation
+alone does not prove that an estimate is invalid.
+\item \textbf{Interpolation effect (6--9Y).} At 6, 7, 8 and 9Y, the spline
+lies respectively $3.78$, $10.08$, $15.03$ and $14.05$ bp below the bootstrap.
+These differences exceed the corresponding positive bootstrap-minus-DB
+gaps and reverse their signs. This is an effect of the five-anchor
+interpolation, not evidence that later high-coupon bonds caused noise in
+the earlier bootstrap yields.
 \end{enumerate}
 
-\textbf{Conclusion.} The trading conclusion from Q1.2 is \emph{not robust}
-to the choice of curve-fitting methodology in exactly the region (6--9Y)
-where the raw bootstrap is most likely contaminated by non-fundamental,
-bond-specific noise. A prudent trader would treat the raw-bootstrap BUY
-signal in 6--9Y with real skepticism, and would want to understand
-\emph{why} those bonds are mispriced (liquidity? embedded option? stale
-quote?) before trading on it, rather than assuming genuine relative value.
+\textbf{Conclusion.} The comparison is sensitive to curve construction.
+Substituting spline estimates for market-implied yields changes the object
+being compared with DB. The six reversals do not establish that the
+bootstrap is erroneous, that the spline removes noise or that a spline-based
+SELL is superior to the original BUY candidate. Trading conclusions require
+consistent cash-flow pricing and an assessment of model risk and costs.
 
 %--------------------------------------------------------------------
 
