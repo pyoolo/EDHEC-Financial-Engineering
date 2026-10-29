@@ -962,50 +962,53 @@ differences between mandates are indicative only. Q2.1 tests which of them
 survive proper inference.
 \end{itemize}
 
-%--------------------------------------------------------------------
 \question{Q2.1 --- Limitations, improvements, and how they change Q1}
 
 \subsection*{(a) Limitations of the design}
 \begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
 \item \textbf{Biased baseline (regime effect).} The ``normal'' change is
-estimated on non-event days, which fall mostly in 2015--16 and 2021--24, the
-Fed hiking cycle. The 10Y non-event baseline rises by $+6.5$bp per 30 days,
-while the average 30-day change was $-3.6$bp in 2017--20 and $-5.8$bp in 2025
-(Table~\ref{tab:drift}). Subtracting a rising baseline from falling-rate
-periods mechanically creates a negative ``abnormal'' change: a large part of
-the Q1.1 post-event drift is a regime effect, not a tariff effect.
+estimated on non-event days, which fall mostly in 2015--16 and 2020--24, a
+period dominated by the 2022--23 hiking cycle. The 10Y non-event baseline
+therefore rises by $+6.5$\,bp per 30 days, while the average 30-day change was
+$-3.6$\,bp in 2017--20 and $-5.8$\,bp in 2025 (Table~\ref{tab:drift}).
+Subtracting a rising baseline from falling-rate periods mechanically creates a
+negative ``abnormal'' change. Q1 shows that this explains most of the
+post-event declines (raw vs.\ abnormal changes in Tables~\ref{tab:q11}
+and~\ref{tab:q13}).
 \item \textbf{Overlapping windows.} Events come in bursts (e.g.\ 14 events
-between 2025-02-01 and 2025-04-10), so 30-day windows overlap and contain each
-other's events. Observations are not independent, and the long windows mix
-many news items.
-\item \textbf{No statistical inference.} Averages are reported without
-standard errors; given a daily standard deviation of about 5bp, a few bp over 30 days is
-well within noise.
+between 2025-02-01 and 2025-04-10). The 30-day windows therefore overlap and
+contain each other's events: observations are not independent, and each long
+window mixes many news items.
+\item \textbf{No valid inference.} The assignment's design produces averages
+without a test. The naive standard errors added in Q1 treat overlapping
+windows as independent, so they overstate precision. With 61 horizons and
+several series, some ``large'' numbers are bound to appear by chance.
 \item \textbf{Event-list quality.}
 \begin{itemize}[nosep]
 \item Two entries are silently lost to duplicated dictionary keys (2025-08-06
 and 2025-03-04).
 \item Some entries are not shocks: ``no retaliation'' announcements, a status
-quo, a US court ruling listed as a foreign response.
+quo, and a US court ruling listed as a foreign response.
 \item Escalations and de-escalations (Phase One deal, delays, exemptions) are
-averaged together, so they offset each other.
-\item Major milestones are missing: the 90-day pause (2025-04-09), the US--China
-Geneva agreement (2025-05-12) and the US--EU deal (2025-07-27).
+averaged together, so their effects offset each other.
+\item Major milestones are missing: the 90-day pause (2025-04-09), the
+US--China Geneva agreement (2025-05-12) and the US--EU deal (2025-07-27).
 \item Some descriptions are inaccurate (145\% was the US rate on China).
 \end{itemize}
-\item \textbf{Sample truncation.} The download stops on 2025-08-01: six
+\item \textbf{Sample truncation.} The download stops on 2025-08-01: eight
 August-2025 events are dropped and late-July windows are cut short.
 \item \textbf{Timing.} Several announcements came after the market close
 (``Liberation Day'' on 2025-04-02 was announced after 4pm ET) or on weekends,
-so day 0 is not the reaction day (Figure~\ref{fig:lib}).
-\item \textbf{Confounding news.} Some event days coincide with FOMC decisions;
-Trump actions and foreign responses share the same trading day seven times (eight in the extended sample).
+so day 0 is not always the reaction day (Figure~\ref{fig:lib}).
+\item \textbf{Confounding news.} Some event days coincide with FOMC
+decisions, and Trump actions and foreign responses share the same trading day
+eight times in the notebook list.
 \item \textbf{Measurement.} Level $=$ 10Y duplicates Q1.1. Constant-maturity
-par yields are used rather than zero rates, and daily closes cannot isolate
-an announcement from other news on the same day.
+par yields are used rather than zero rates, and daily closes cannot isolate an
+announcement from other news on the same day.
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{lrrrr}
@@ -1015,17 +1018,19 @@ Period & 2015--16 & 2017--20 (1st term) & 2021--24 & 2025 (2nd term) \\
 Mean 30-day 10Y change (bp) & $+3.3$ & $-3.6$ & $+9.7$ & $-5.8$ \\
 \bottomrule
 \end{tabular}
-\caption{Average 30-day change of the 10Y yield by period: the non-event
-baseline ($+6.5$bp) is dominated by the 2021--24 hiking cycle.}
+\caption{Average 30-day change of the 10Y yield by period. The non-event
+baseline of the assignment ($+6.5$\,bp) is dominated by the 2021--24 hiking
+cycle.}
 \label{tab:drift}
 \end{table}
 
 \subsection*{(b) Improvements implemented}
-All are in \texttt{06\_event\_study.py}, function \texttt{part\_q2}.
+All improvements are in \nolinkurl{06_event_study.py}, function
+\texttt{part\_q2}.
 \begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
 \item \textbf{Cleaned and signed event list.}
 \begin{itemize}[nosep]
-\item Duplicated keys merged; six non-events removed (list in the code).
+\item Duplicated keys merged and six non-events removed (list in the code).
 \item Each event signed as escalation ($+1$) or de-escalation ($-1$).
 \item Three missing de-escalation milestones added.
 \item Result: 72 events, of which 63 escalations and 9 de-escalations.
@@ -1033,124 +1038,178 @@ All are in \texttt{06\_event\_study.py}, function \texttt{part\_q2}.
 \item \textbf{Extended sample} to 2025-10-31, so that every event has a full
 window.
 \item \textbf{Short windows} $[-1,+1]$ and $[0,+5]$ to capture the
-announcement effect. $[-1,+1]$ also covers after-close announcements, since
-the reaction then occurs on day $+1$.
-\item \textbf{Local baseline.} Expected change $=$ average daily change in
-the \emph{same mandate} on clean days (no event within $\pm5$ days), times
-the window length. This is a constant-mean model by regime, instead of a
-2015--2025 average.
+announcement effect. The $[-1,+1]$ window also covers after-close
+announcements, whose reaction occurs on day $+1$.
+\item \textbf{Baseline from the same mandate.} The expected change is the
+average change over windows of the same length that start on ordinary days of
+the same mandate, i.e.\ days with no event within $\pm1$ day (913 days in the
+first term, 127 in the second). Each event is thus compared with a typical
+window of its own rate regime, not with a 2015--2025 average.
 \item \textbf{Placebo inference.} For each group we draw 5{,}000 sets of
-pseudo-event dates (same number per mandate, from clean days of that
-mandate). The two-sided $p$-value is the share of placebo averages at least
-as extreme as the actual one.
+pseudo-event dates from the same pools, keeping the number of events per
+mandate. The two-sided $p$-value is the share of placebo averages at least as
+extreme as the actual one.
+\begin{itemize}[nosep]
+\item A stricter pool (no event within $\pm5$ days) leaves only 56 days in
+2025. These are unusually calm days, so the placebo distribution becomes too
+narrow and the $p$-values too optimistic.
+\item With that pool, 6 results lose significance at 5\% and 5 gain it, but
+none of the conclusions below changes (\nolinkurl{pl_q2_placebo_sensitivity.csv}).
+\end{itemize}
 \item \textbf{De-clustering.} The 30-day window uses only the first event of
 each cluster (no other event in the previous 5 trading days).
-\item \textbf{Robustness.} We exclude events with a same-day foreign response,
-events within $\pm1$ day of an FOMC decision, and replace the 10Y by a PCA
-level (first principal component of daily changes).
+\item \textbf{Robustness.} We exclude events with a same-day foreign response
+and events within $\pm1$ day of an FOMC decision, and we replace the 10Y by a
+PCA level (first principal component of daily changes). For 2025 we also drop
+April, the month of ``Liberation Day'' and of the Treasury basis-trade
+deleveraging (Table~\ref{tab:rob25}).
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lrrrrrrrrrr}
 \toprule
  & \multicolumn{4}{c}{$[-1,+1]$} & \multicolumn{3}{c}{$[0,+5]$} & \multicolumn{2}{c}{$[0,+30]$, cluster heads} & \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-8}\cmidrule(lr){9-10}
 Group & 2Y & 10Y & 30Y & Slope & 10Y & 30Y & Slope & 2Y & 10Y & $n$ \\
 \midrule
-Trump escalations     & $-0.1$ & $+0.1$ & $+1.1$ & $+0.2$ & $+0.1$ & $+0.9$ & $+1.6^{**}$ & $+2.9$ & $+3.0$ & 31/18 \\
-\quad 1st term        & $-2.1$ & $-2.2$ & $-1.7$ & $0.0$  & $-0.7$ & $-0.8$ & $-0.7$ & $+9.0$ & $+7.2$ & 16/12 \\
-\quad 2nd term        & $+2.1$ & $+2.6$ & $+4.1^{**}$ & $+0.5$ & $+0.9^{*}$ & $+2.6^{**}$ & $+4.0^{**}$ & $-9.3$ & $-5.5$ & 15/6 \\
-Foreign escalations   & $+0.8$ & $+2.5^{*}$ & $+2.9^{**}$ & $+1.6^{**}$ & $+3.0^{**}$ & $+3.2^{**}$ & $+1.7^{**}$ & $+1.4$ & $+4.8$ & 32/10 \\
-\quad 1st term        & $+0.4$ & $+0.4$ & $+0.6$ & $0.0$  & $+0.6$ & $-0.7$ & $-1.7$ & $+10.7$ & $+7.7$ & 20/7 \\
-\quad 2nd term        & $+1.6$ & $+5.9^{**}$ & $+6.9^{**}$ & $+4.3^{**}$ & $+7.1^{**}$ & $+9.5^{**}$ & $+7.2^{**}$ & $-20.3^{**}$ & $-2.0$ & 12/3 \\
-De-escalations (all)  & $+5.1^{**}$ & $+4.8^{*}$ & $+4.6^{*}$ & $-0.3$ & $-0.4$ & $+1.4$ & $+2.2^{*}$ & $-26.7^{**}$ & $-24.5^{**}$ & 9/4 \\
+Trump escalations    & $+1.2$ & $+1.5$ & $+2.1$ & $+0.3$ & $+1.8$ & $+2.0$ & $+2.0^{*}$ & $+6.6$ & $+6.1$ & 31/18 \\
+\quad 1st term       & $-2.3$ & $-2.2$ & $-1.5$ & $+0.1$ & $-0.6$ & $-0.5$ & $-0.4$ & $+7.9$ & $+7.2$ & 16/12 \\
+\quad 2nd term       & $+5.1^{**}$ & $+5.5^{**}$ & $+6.0^{**}$ & $+0.4$ & $+4.3$ & $+4.7^{*}$ & $+4.6^{**}$ & $+4.1$ & $+4.1$ & 15/6 \\
+\addlinespace
+Foreign escalations  & $+1.8$ & $+3.5^{**}$ & $+3.7^{**}$ & $+1.7^{*}$ & $+4.3^{**}$ & $+4.1^{**}$ & $+2.1^{*}$ & $+4.6$ & $+7.7$ & 32/10 \\
+\quad 1st term       & $+0.2$ & $+0.4$ & $+0.7$ & $+0.2$ & $+0.6$ & $-0.4$ & $-1.4$ & $+9.5$ & $+7.7$ & 20/7 \\
+\quad 2nd term       & $+4.6^{**}$ & $+8.8^{**}$ & $+8.8^{**}$ & $+4.2^{**}$ & $+10.5^{**}$ & $+11.6^{**}$ & $+7.7^{**}$ & $-6.9$ & $+7.6$ & 12/3 \\
+\addlinespace
+De-escalations (all) & $+7.0^{**}$ & $+6.7^{**}$ & $+5.9^{**}$ & $-0.3$ & $+1.9$ & $+2.9$ & $+2.6$ & $-20.6^{**}$ & $-19.7^{**}$ & 9/4 \\
 \bottomrule
 \end{tabular}
-\caption{Improved design: abnormal change in bp (positive $=$ yields up),
-regime-specific baseline, extended sample, cleaned events. Placebo
-$p$-values: $^{*}p<0.10$, $^{**}p<0.05$. $n$ $=$ events in the short / 30-day
-windows.}
+\caption{Improved design: abnormal change in bp (positive $=$ yields up)
+relative to ordinary windows of the same mandate, extended sample, cleaned
+events. Placebo $p$-values: $^{*}p<0.10$, $^{**}p<0.05$. $n$ $=$ events in
+the short / 30-day windows.}
 \label{tab:improved}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{pl_q2_improved_dotplot.png}
 \caption{Improved estimates (dots) against the 95\% range of the placebo
 distribution (grey bars). Red dots are significant at 5\%.}
 \end{figure}
 
-\begin{figure}[h]
+\begin{table}[!htbp]
+\centering
+\small
+\begin{tabular}{lcrrrr}
+\toprule
+ & & \multicolumn{2}{c}{10Y} & \multicolumn{2}{c}{30Y} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+2025 escalations, window $[-1,+1]$ & $n$ & bp & $p$ & bp & $p$ \\
+\midrule
+Trump actions, all                  & 15 & $+5.5$ & 0.005 & $+6.0$ & 0.002 \\
+\quad excl.\ April 2025             & 13 & $+5.7$ & 0.006 & $+5.7$ & 0.005 \\
+\quad excl.\ same-day foreign response & 12 & $+3.4$ & 0.112 & $+3.7$ & 0.072 \\
+\addlinespace
+Foreign responses, all              & 12 & $+8.8$ & $<0.001$ & $+8.8$ & $<0.001$ \\
+\quad excl.\ April 2025             & 9  & $+6.7$ & 0.005 & $+6.7$ & 0.006 \\
+\quad excl.\ same-day Trump action  & 9  & $+7.1$ & 0.004 & $+6.8$ & 0.005 \\
+\bottomrule
+\end{tabular}
+\caption{Robustness of the 2025 announcement effect (placebo $p$-values). No
+2025 escalation falls within $\pm1$ day of an FOMC decision, so that
+exclusion changes nothing.}
+\label{tab:rob25}
+\end{table}
+
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{pl_q2_liberation_day.png}
 \caption{Daily yields around ``Liberation Day''. The announcement came after
-the close on 2 April, so the reaction is on 3 April ($-20$bp 2Y, $-14$bp
-10Y); from 7 to 10 April the long end sold off ($+45$bp on the 30Y between the 4 and 10 April closes) while tariffs were still escalating.}
+the close on 2 April, so the reaction is on 3 April ($-20$\,bp 2Y, $-14$\,bp
+10Y). From 7 to 10 April the long end sold off ($+45$\,bp on the 30Y between
+the 4 and 10 April closes) while tariffs were still escalating.}
 \label{fig:lib}
 \end{figure}
 
 \subsection*{(c) How the improvements change our answers to Q1}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \footnotesize
-\begin{tabular}{p{1.3cm}p{6.3cm}p{6.6cm}}
+\begin{tabular}{p{1.1cm}p{5.4cm}p{7.6cm}}
 \toprule
  & Assignment design (Q1) & Improved design (Q2) \\
 \midrule
-Q1.1 & Yields fall 10--14bp after Trump actions, mostly at the front end:
-flight to quality. & \textbf{Not robust.} No significant announcement effect
-(all $p>0.12$ across the five robustness variants). The 30-day decline
-disappears ($+2.9$bp on the 2Y, n.s.) once the baseline is the same-regime
-drift: it was a rate-cycle effect. \\
+Q1.1 & Abnormal declines of 10--14\,bp after Trump actions, but no
+announcement effect and a raw change close to zero. &
+\textbf{Confirmed: no effect when both mandates are pooled.} Trump escalations
+have no significant announcement effect ($p\ge0.13$; 1 of 20 robustness
+cells below 5\%). The 30-day decline disappears ($+6.6$\,bp on the 2Y, n.s.)
+once each event is compared with its own rate regime. \\
 \addlinespace
-Q1.2 & Bull steepening (level down, slope $+4.5$bp). & Level effect not
-significant. The \textbf{steepening survives} in the short window (slope
-$+1.6$bp$^{**}$ over $[0,+5]$), driven by the second term ($+4.0$bp$^{**}$),
-and comes from the long end \emph{rising}, not from the front end falling. \\
+Q1.2 & Level down, slope up ($+4.5$\,bp): an apparent bull steepening. &
+No level effect when pooled. A steepening over $[0,+5]$ ($+2.0$\,bp, $p=0.07$)
+comes entirely from 2025 ($+4.6$\,bp$^{**}$), and it follows a \emph{rise} in
+yields, not a front-end rally: a bear steepening. \\
 \addlinespace
-Q1.3 & Little reaction after foreign responses. & \textbf{Significant
-rise} in long yields: 10Y $+3.0$bp$^{**}$ and 30Y $+3.2$bp$^{**}$ over
-$[0,+5]$, entirely due to 2025 (10Y $+7.1$, 30Y $+9.5$bp). \\
+Q1.3 & Abnormal change near zero after responses, while raw 10Y and 30Y
+yields rise by 5--7\,bp. & \textbf{Significant rise in long yields}: 10Y
+$+3.5^{**}$ and 30Y $+3.7^{**}$ at the announcement, $+4.1$ to $+4.3^{**}$
+over five days. The effect is entirely due to 2025 (10Y and 30Y
+$+8.8^{**}$, slope $+4.2^{**}$) and survives dropping April. \\
 \addlinespace
-Q1.4 & 2nd term: bigger front-end rally. & The front-end rally is not
-significant at short horizons. The robust difference is at the long end:
-\textbf{first term no reaction, second term yields up and curve steeper}.
-Treasuries did not act as a safe haven in 2025. \\
+Q1.4 & 1st term: no raw reaction. 2nd term: front-end decline and
+steepening. & \textbf{1st term: no effect at any horizon. 2nd term: yields
+rise} by 5--6\,bp across the curve on Trump escalation days and by 9\,bp at
+the long end after retaliation; the curve then steepens. The 30-day
+front-end decline of 2025 is not event-specific: it is the general 2025
+trend. Treasuries did not act as a safe haven. \\
 \addlinespace
-New & --- & \textbf{De-escalations} raise yields ($+5.1$bp$^{**}$ on the 2Y
-over $[-1,+1]$; e.g.\ $+20$bp on 9 April 2025): ``risk-on'', the mirror image
-of the flight-to-quality channel, which averaging both types had hidden. \\
+New & --- & \textbf{De-escalations also raise yields} ($+6$ to $+7$\,bp, with
+an unchanged slope; e.g.\ $+20$\,bp on the 2Y on 9 April 2025). This is a
+``risk-on'' repricing of expected Fed cuts, which pooling escalations with
+de-escalations had hidden. \\
 \bottomrule
 \end{tabular}
 \caption{Conclusions before and after the methodological improvements.}
+\label{tab:before_after}
 \end{table}
 
-\textbf{Overall.} The smooth 60-day patterns of Q1 are mostly macro regime
-plus clustering, not tariff news. Once these are removed, three findings
-remain:
+\textbf{Overall.} The smooth 60-day patterns of Q1 are mostly a rate-regime
+effect plus clustering, not tariff news. Once these are removed, three
+findings remain:
 \begin{enumerate}[nosep]
 \item First-term tariff news had no measurable effect on Treasury yields.
-\item In 2025, escalation days, and above all foreign retaliation, pushed
-\emph{long} yields up and steepened the curve, consistent with a rising term
-premium (inflation, fiscal and foreign-demand concerns) rather than a flight
-to safety.
-\item De-escalations caused a risk-on rise in front-end yields.
+\item In 2025, escalation days, and above all foreign retaliation,
+\emph{raised} yields and steepened the curve. The rise is largest at the long
+end, consistent with a rising term premium (inflation, fiscal and
+foreign-demand concerns) rather than a flight to safety. It is not driven by
+April 2025 alone.
+\item De-escalations raised yields roughly in parallel, as markets priced out
+Fed cuts. The \emph{slope} separates the two channels: escalations steepen
+the curve, de-escalations do not.
 \end{enumerate}
 
 \textbf{Remaining limitations.}
 \begin{itemize}[nosep]
-\item Second-term groups are small (3--15 events) and concentrated in April
-2025, when other forces also hit the long end (deleveraging of Treasury
-basis trades, swap-spread moves), so the 2025 result is suggestive rather
-than conclusive.
-\item A cleaner design would use intraday Treasury futures in 30-minute
-windows around each announcement and zero-coupon rather than par yields.
-\item With the relevant curves, foreign yields could measure the reaction in
-the targeted countries directly.
+\item \textbf{Multiple testing.} Table~\ref{tab:improved} reports 84 tests,
+21 of them significant at 5\%, against about 4 expected by chance. The
+significant cells, however, are concentrated in the 2025 groups, whose events
+fall in the same few months, so they are far from 21 independent findings.
+\item \textbf{Small samples.} The second-term groups have 12--15 events in
+the short windows and only 3--6 in the 30-day windows. The 30-day results,
+including the $-20$\,bp for de-escalations ($n=4$), are anecdotal.
+\item \textbf{Overlaps remain.} Removing same-day foreign responses weakens
+the 2025 Trump effect ($p=0.07$--$0.11$), so part of it may be retaliation
+news released on the same day.
+\item \textbf{Daily data.} A cleaner design would use intraday Treasury
+futures in 30-minute windows around each announcement, and zero-coupon rather
+than par yields.
+\item \textbf{Foreign curves.} With the relevant data, foreign yields could
+measure the reaction in the targeted countries directly.
 \end{itemize}
 
 \end{document}

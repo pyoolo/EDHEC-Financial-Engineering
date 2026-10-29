@@ -68,6 +68,7 @@ END_ORIGINAL = "2025-08-01"               # sample used in the notebook (Q1)
 END_EXTENDED = "2025-10-31"               # extended sample (Q2 improvement)
 RNG = np.random.default_rng(2764)         # fixed seed: placebo tests reproducible
 N_PLACEBO = 5000
+PLACEBO_EXCL = 1                          # placebo/drift days: no event within +-1 day
 
 # Colours: EDHEC red / grey as in Part I, plus a blue and a green for maturities
 RED, GREY, BLUE, GREEN, ORANGE = "#9e1b32", "#4d4d4d", "#2a78d6", "#1baf7a", "#eb6834"
@@ -443,27 +444,33 @@ def car(values: np.ndarray, pos: np.ndarray, a: int, b: int) -> np.ndarray:
     return out
 
 
-def improved_test(df, ev, col, win, pools, drift):
-    """Abnormal CAR (actual - term drift x length), placebo p-value.
-    Placebo: same number of pseudo-events per term, drawn from 'clean' days
-    of that term (no event within +-5 days), N_PLACEBO draws."""
+def improved_test(df, ev, col, win, pools, drift=None):
+    """Abnormal change over window `win` and its placebo p-value.
+
+    Expected change (default, drift=None): the average change over windows of
+    the same length that start on placebo days of the same mandate.  Estimate
+    and test then measure the same thing: are event windows different from
+    ordinary windows of that mandate?  If `drift` is given (old design), the
+    expected change is drift (bp/day) x window length instead.
+    Placebo: N_PLACEBO draws of the same number of pseudo-events per mandate
+    from that mandate's pool; two-sided p-value."""
     a, b = IMP_WINDOWS[win]
     L = b - a + 1
     vals = df[col].values * 100
-    pos = ev.pos.values
-    exp = np.array([drift[(t, col)] * L for t in ev.term])
-    ab = car(vals, pos, a, b) - exp
-    keep = ~np.isnan(ab)
-    ab, terms = ab[keep], ev.term.values[keep]
-    if len(ab) == 0:
+    raw = car(vals, ev.pos.values, a, b)
+    keep = ~np.isnan(raw)
+    raw, terms = raw[keep], ev.term.values[keep]
+    if len(raw) == 0:
         return dict(n=0, mean=np.nan, t=np.nan, p=np.nan, lo=np.nan, hi=np.nan)
+    ab = np.empty_like(raw)
     sims = np.zeros(N_PLACEBO)
     for term in np.unique(terms):
         k = int((terms == term).sum())
-        pool = pools[term]
-        pc = car(vals, pool, a, b) - drift[(term, col)] * L
+        pc = car(vals, pools[term], a, b)
         pc = pc[~np.isnan(pc)]
-        draws = RNG.choice(pc, size=(N_PLACEBO, k), replace=True)
+        expected = pc.mean() if drift is None else drift[(term, col)] * L
+        ab[terms == term] = raw[terms == term] - expected
+        draws = RNG.choice(pc - expected, size=(N_PLACEBO, k), replace=True)
         sims += draws.sum(axis=1)
     sims /= len(ab)
     m = ab.mean()
@@ -483,22 +490,35 @@ def part_q2(ycd_full: pd.DataFrame, events_q1: pd.DataFrame):
     ev = clean_events(idx)
     ev.to_csv(OUT / "pl_q2_clean_events.csv", index=False)
 
-    # clean placebo pools and per-term daily drift (constant-mean model)
-    near = np.zeros(len(df), bool)
-    for p in ev.pos:
-        near[max(0, p - 5):p + 6] = True
-    pools, drift = {}, {}
-    for term, (s, e) in TERMS.items():
-        in_term = (df.date >= s) & (df.date <= e)
-        pools[term] = np.where(in_term & ~near)[0]
-        for c in SERIES + ["pca_level"]:
-            dd = df[c].diff().values * 100
-            drift[(term, c)] = np.nanmean(dd[pools[term]])
+    # Placebo pools by mandate.
+    #  * Main design: pool = days of the same mandate with no event within
+    #    +-PLACEBO_EXCL (=1) days; expected change = mean change over windows of
+    #    the same length starting on pool days (see improved_test).
+    #  * Old design (sensitivity): pool = days with no event within +-5 days and
+    #    expected change = mean daily change on that pool x window length.  In
+    #    2025 that pool has only 56 unusually calm days, so the placebo
+    #    distribution is too narrow and the p-values too optimistic.
+    def make_pools(excl):
+        near = np.zeros(len(df), bool)
+        for p in ev.pos:
+            near[max(0, p - excl):p + excl + 1] = True
+        pl, dr = {}, {}
+        for term, (s, e) in TERMS.items():
+            in_term = ((df.date >= s) & (df.date <= e)).values
+            pl[term] = np.where(in_term & ~near)[0]
+            for c in SERIES + ["pca_level"]:
+                dd = df[c].diff().values * 100
+                dr[(term, c)] = np.nanmean(dd[pl[term]])
+        return pl, dr
+
+    pools, _ = make_pools(PLACEBO_EXCL)
+    pools5, drift5 = make_pools(5)
+    drift = None                                     # main design: window-mean expectation
+    print("Placebo pool size (days) per term, +-%d / +-5 exclusion:" % PLACEBO_EXCL,
+          {t: (len(pools[t]), len(pools5[t])) for t in TERMS})
 
     print("\nQ2 extended sample to", df.date.max().date(), "| cleaned events:", len(ev),
           "| escalations:", int((ev.sign > 0).sum()), "| de-escalations:", int((ev.sign < 0).sum()))
-    print("Daily drift per term (bp/day), 10Y:",
-          {t: round(drift[(t, '10Y')], 3) for t in TERMS})
 
     # ---- why the notebook baseline is biased: mean 30-day change by period --
     ch30 = (df.set_index("date")["10Y"].shift(-30) - df.set_index("date")["10Y"]) * 100
@@ -539,6 +559,26 @@ def part_q2(ycd_full: pd.DataFrame, events_q1: pd.DataFrame):
     print((piv.astype(str) + stars).to_string())
     print("n events:\n", nn.to_string())
 
+    # ---- sensitivity: placebo pool +-1 (main) vs. +-5 (calm days only) ---------
+    sens = []
+    for g, sub in groups.items():
+        for col in ["2Y", "10Y", "30Y", "slope"]:
+            for win in ["[-1,+1]", "[0,+5]", "[0,+30]"]:
+                sub_w = sub[sub.cluster_head] if win == "[0,+30]" else sub
+                r5 = improved_test(df, sub_w, col, win, pools5, drift5)
+                r1 = res[(res.group == g) & (res.series == col) & (res.window == win)].iloc[0]
+                sens.append({"group": g.strip(), "series": col, "window": win, "n": int(r1["n"]),
+                             "mean_new": r1["mean"], "p_new": r1["p"],
+                             "mean_old": r5["mean"], "p_old": r5["p"]})
+    sens = pd.DataFrame(sens)
+    sens.to_csv(OUT / "pl_q2_placebo_sensitivity.csv", index=False)
+    lost = sens[(sens.p_old < 0.05) & (sens.p_new >= 0.05)]
+    gained = sens[(sens.p_old >= 0.05) & (sens.p_new < 0.05)]
+    print(f"\nSensitivity to the placebo design: {int((sens.p_old < 0.05).sum())} cells significant at 5% "
+          f"with the old design (+-5 calm-day pool) vs {int((sens.p_new < 0.05).sum())} with the new one.")
+    print("Lose significance:\n", lost.round(3).to_string(index=False))
+    print("Gain significance:\n", gained.round(3).to_string(index=False))
+
     # ---- robustness of the announcement effect --------------------------------
     rob = []
     ta_esc = groups["Trump actions (esc.)"]
@@ -553,6 +593,18 @@ def part_q2(ycd_full: pd.DataFrame, events_q1: pd.DataFrame):
         for col in ["2Y", "10Y", "30Y", "pca_level"]:
             r = improved_test(df, sub, col, "[-1,+1]", pools, drift)
             rob.append({"variant": v, "series": col, "n": r["n"], "mean": r["mean"], "p": r["p"]})
+    # second-term results: do they survive without April 2025 (Liberation Day,
+    # basis-trade deleveraging) or without overlapping/FOMC days?
+    apr = (ev.date >= "2025-04-01") & (ev.date <= "2025-04-30")
+    for typ, lab in [("trump_action", "2nd term Trump esc."), ("country_response", "2nd term foreign esc.")]:
+        base = esc[(esc.event_type == typ) & (esc.term == "second_term")]
+        for v, sub in {f"{lab}": base,
+                       f"{lab}, excl. April 2025": base[~apr.loc[base.index]],
+                       f"{lab}, excl. same-day overlap": base[~base.overlap_other_type],
+                       f"{lab}, excl. +-1 day of FOMC": base[~base.near_fomc]}.items():
+            for col in ["2Y", "10Y", "30Y", "pca_level"]:
+                r = improved_test(df, sub, col, "[-1,+1]", pools, drift)
+                rob.append({"variant": v, "series": col, "n": r["n"], "mean": r["mean"], "p": r["p"]})
     rob = pd.DataFrame(rob)
     rob.to_csv(OUT / "pl_q2_robustness.csv", index=False)
     print("\nRobustness, Trump escalations, [-1,+1] (bp, placebo p):")
