@@ -55,17 +55,14 @@ Settlement date: \textbf{August 15, 2003}. Exhibit 1 lists 52 Treasury coupon
 bonds whose maturities fall on successive semi-annual dates (Feb 15 / Aug 15)
 from 2004 to 2029 with no gaps, i.e.\ exactly one bond at each of the nodes
 $t=0.5,1.0,\dots,26.0$ years. This allows the classic \emph{successive
-substitution} bootstrap: because each bond introduces exactly one new unknown
-discount factor, we solve sequentially from the shortest to the longest
-maturity.
+substitution} bootstrapping method.
 
 \textbf{Compounding convention.} Exhibit 4's footnote states explicitly that
 Deutsche Bank's own model yields are \emph{Bond-Equivalent Yields} (BEY),
 i.e.\ twice the semi-annual compounded yield. Since U.S.\ Treasuries pay
 semi-annual coupons, we derive our own zero-coupon yields in the identical
 BEY convention throughout, so that every comparison against the DB model in
-Q1.2 is apples-to-apples (a continuously-compounded convention would have
-introduced a small but systematic bias in one direction).
+Q1.2 is apples-to-apples.
 $$\text{BEY} = 2\left(D^{-1/k}-1\right), \qquad D = \text{discount factor to period } k \text{ (6-month steps)}.$$
 
 %--------------------------------------------------------------------
@@ -79,10 +76,10 @@ D_k = \frac{P_k - \frac{c}{2}\sum_{j=1}^{k-1}D_j}{\frac{c}{2}+100}.$$
 Solved in order of increasing maturity, using only already-known $D_j$, $j<k$.
 
 \textbf{Validation.} Our bootstrapped curve matches Deutsche Bank's own
-Exhibit 4 model yields \emph{exactly} at 2Y (1.873\%) and 10Y (4.711\%) ---
-precisely the maturities the case identifies as DB's own calibration points
-for its three-factor model. This is strong internal validation that both the
-bootstrap algorithm and the BEY convention choice are correct.
+Exhibit 4 model yields \emph{exactly} at 2Y (1.873\%) and 10Y (4.711\%) 
+i.e.\ the maturities the case identifies as DB's own calibration points
+for its three-factor model. This is strong internal validation they were 
+appropriate methods to use.
 
 \begin{table}[h]
 \centering
@@ -105,8 +102,8 @@ Maturity (y) & Discount Factor & Zero Yield (BEY) \\
 \caption{Bootstrapped zero-coupon curve, selected maturities (full 52-point curve in \texttt{q1\_bootstrapped\_curve.csv}).}
 \end{table}
 
-The curve shape is the standard concave, upward-sloping Treasury curve of
-the period, flattening from about 15Y onward and showing a very slight
+The curve shape is the standard concave, upward-sloping Treasury curve over
+the period, flattening from about 15Y onward and a very slight
 downward drift between 20Y and 26Y.
 
 %--------------------------------------------------------------------
@@ -116,7 +113,8 @@ downward drift between 20Y and 26Y.
 bootstrapped (market-implied) yield is \emph{higher} than DB's model yield,
 the bond's market price is below the model's ``fair'' price $\Rightarrow$ the
 bond is \textbf{cheap} $\Rightarrow$ \textbf{BUY}. If the market yield is
-\emph{lower}, the bond is \textbf{rich} $\Rightarrow$ \textbf{SELL}.
+\emph{lower}, the bond is \textbf{expensive} $\Rightarrow$ \textbf{SELL}.
+We keep a $\pm 1 bps$ margin where the signal remains as "fair".
 
 \begin{table}[h]
 \centering
@@ -125,7 +123,7 @@ bond is \textbf{cheap} $\Rightarrow$ \textbf{BUY}. If the market yield is
 \toprule
 Maturity (y) & DB Model Yield & Market Yield (Q1.1) & Diff (bps) & Signal \\
 \midrule
-1  & 1.2443\% & 1.1930\% & $-5.13$ & SELL (rich) \\
+1  & 1.2443\% & 1.1930\% & $-5.13$ & SELL (expensive) \\
 2  & 1.8727\% & 1.8727\% & $+0.00$ & fair (DB calibration point) \\
 3  & 2.4110\% & 2.4711\% & $+6.01$ & \textbf{BUY (cheap)} \\
 4  & 2.9665\% & 3.0084\% & $+4.19$ & \textbf{BUY (cheap)} \\
@@ -137,7 +135,7 @@ Maturity (y) & DB Model Yield & Market Yield (Q1.1) & Diff (bps) & Signal \\
 10 & 4.7107\% & 4.7107\% & $-0.00$ & fair (DB calibration point) \\
 15 & 5.7160\% & 5.7167\% & $+0.07$ & fair \\
 20 & 5.9517\% & 5.9513\% & $-0.04$ & fair \\
-25 & 5.9315\% & 5.9128\% & $-1.87$ & SELL (rich) \\
+25 & 5.9315\% & 5.9128\% & $-1.87$ & SELL (expensive) \\
 \bottomrule
 \end{tabular}
 \caption{Market vs. DB model comparison and trading signals.}
@@ -145,36 +143,36 @@ Maturity (y) & DB Model Yield & Market Yield (Q1.1) & Diff (bps) & Signal \\
 
 \textbf{Pattern.} The belly of the curve (3--9 years) is uniformly
 \emph{cheap} relative to the DB model, by 1--6 bps, suggesting a BUY
-candidate basket in that region. The very short end (1Y) and the long end
-(25Y) look \emph{rich}. The 2Y, 10Y, 15Y and 20Y points are essentially fair
-by construction or coincidence (2Y and 10Y are DB's own calibration anchors).
+signal in that region. The very short end (1Y) and the long end
+(25Y) look \emph{expensive}. The 2Y, 10Y, 15Y and 20Y points are essentially fair
+by construction (calibration anchors) or coincidence.
 
 %--------------------------------------------------------------------
 \question{Q1.3 --- Is this risk-free arbitrage?}
 
-No. Although the strategy is directional and model-based, it is \textbf{not}
+Although the strategy is directional and model-based, it is \textbf{not}
 a riskless arbitrage, for several reasons:
 
 \begin{itemize}[leftmargin=1.2em]
 \item \textbf{Model risk.} The ``mispricing'' is only a mispricing relative
-to Deutsche Bank's own three-factor curve model. If the model is
+to Deutsche Bank's three-factor model. If the model is
 mis-specified (wrong number of factors, wrong functional form, stale
-calibration), the signal is simply wrong --- there is no model-independent
-proof that the belly of the curve is ``truly'' cheap.
+calibration), the signal could simply be wrong. 
 \item \textbf{Convergence/timing risk.} Even if the model is correctly
 specified on average, there is no guarantee \emph{when}, or even
 \emph{whether}, market yields converge back toward the model yields within
-the trader's holding horizon. The position carries interim mark-to-market
+the trader's holding horizon. The position carries mark-to-market
 risk.
 \item \textbf{No riskless, capital-structure-free payoff.} A true arbitrage
 requires a replicating, self-financing portfolio with a knowable, riskless
-terminal payoff (e.g.\ a textbook cash-and-carry). Here the ``trade'' is an
-outright directional bet on convergence, funded at some financing rate, with
-basis risk between the position and any hedge.
+terminal payoff. Here the ``trade'' is a directional bet on convergence, 
+funded at some financing rate, with basis risk (signal on a Zero Coupon 
+vs. trading on Coupon Bonds) between the position and any hedge.
 \item \textbf{Curve risk while waiting.} Between trade inception and
 convergence, the \emph{whole} curve can move (parallel shifts, twists), and
-unless the position is duration/key-rate hedged, those moves swamp the small
+unless the position is duration/key-rate hedged, those moves can override the small
 model-implied edge of a few basis points.
+
 \end{itemize}
 In short, this is a \textbf{relative-value} trade: a model-informed bet with
 positive expected value under the trader's own beliefs about the model's
@@ -185,8 +183,9 @@ validity, not a riskless arbitrage in the classical sense.
 
 \textbf{Methodology.} Natural cubic spline (zero second derivative at the
 boundary knots) through the five knots specified (2, 5, 10, 15, 20 years),
-fit directly on the Q1.1 bootstrapped BEY yields. Outside $[2,20]$y the
-spline is extrapolated using its boundary slope.
+fit directly on the Q1.1 bootstrapped BEY yields. Natural endpoints are an
+explicit modelling choice, not SciPy's default. Outside $[2,20]$y the first
+or last cubic polynomial is continued; the tails are not generally linear.
 
 \begin{figure}[h]
 \centering
@@ -194,24 +193,30 @@ spline is extrapolated using its boundary slope.
 \caption{Cubic spline (red) vs. raw bootstrapped zero yields (grey dots). Shaded regions are extrapolated.}
 \end{figure}
 
-\textbf{Fit quality.} Within the knot range $[2,20]$y: mean residual
-$=-5.50$\,bps, std $=8.28$\,bps, max $|$residual$| = 29.91$\,bps. The
-residuals are \emph{not} randomly scattered: the largest errors cluster
-sharply between 7.5 and 13 years (up to $-30$\,bps at 11.5Y), exactly the
-maturity window in which Exhibit 1 contains several legacy, high-coupon
-bonds issued in the early 1980s (coupons of 13.25\%, 12.5\%, 11.25\%,
-10.625\%). These bonds plausibly carry idiosyncratic pricing noise (age,
-liquidity, possible embedded optionality/callability common to that
-vintage), which the raw bootstrap faithfully reproduces pointwise but which
-the smooth spline, by construction, averages away.
+\textbf{Fit quality.} For the 37 observations within $[2,20]$y, including
+the five anchors, the residual (spline minus bootstrap) has mean
+$-5.50$\,bps, sample standard deviation $8.28$\,bps and maximum absolute
+value $29.91$\,bps, attained at 11.5Y with a negative sign.
+The spline interpolates five selected yields exactly; it does not
+statistically estimate or average away noise. The high-coupon bonds cited
+in Exhibit 1 mature at 10.5--12Y, so they cannot determine earlier 6--9Y
+bootstrap yields in a successive-substitution procedure. The supplied
+evidence does not establish issuance vintage, liquidity or callability as
+the cause of the residuals.
 
 %--------------------------------------------------------------------
 \question{Q2.2 --- Does using the spline change the Q1.2 conclusions?}
 
+Spline estimates are useful at maturities without an observed point and
+when a continuous curve is required for valuation or scenario analysis.
+Replacing available market-implied yields with a five-anchor approximation
+is a modelling choice; the spline does not exactly reprice all input bonds.
+
 We repeat the Q1.2 comparison using the \textbf{spline-implied} yield
-(instead of the raw bootstrap) at every maturity used in the original
-table, since the spline value differs from the raw bootstrap except
-exactly at the five knots (2,5,10,15,20).
+instead of the bootstrap. The spline must match the five anchors
+(2,5,10,15,20Y) and may differ elsewhere. The table retains BUY/SELL as
+\emph{conditional, model-based labels}, with the Q1.2 reporting band:
+these are comparisons of curve estimates against DB, not new market quotes.
 
 \begin{table}[h]
 \centering
@@ -221,7 +226,7 @@ exactly at the five knots (2,5,10,15,20).
 Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Changed vs. Q1.2?} \\
 \midrule
 1  & 1.2443\% & 1.2846\% & $+4.03$  & BUY  & \textbf{YES} (was SELL) \\
-2  & 1.8727\% & 1.8727\% & $+0.02$  & fair & no (knot) \\
+2  & 1.8727\% & 1.8727\% & $+0.00$  & fair & no (knot) \\
 3  & 2.4110\% & 2.4608\% & $+4.98$  & BUY  & no \\
 4  & 2.9665\% & 3.0096\% & $+4.31$  & BUY  & no \\
 5  & 3.4454\% & 3.4799\% & $+3.45$  & BUY  & no (knot) \\
@@ -243,114 +248,298 @@ Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Ch
 Two distinct mechanisms are at work:
 
 \begin{enumerate}[leftmargin=1.4em]
-\item \textbf{Extrapolation risk (1Y and 25Y).} These two points lie
-\emph{outside} the spline's knot range $[2,20]$y. The natural spline's
-boundary-slope extrapolation is a pure modelling artifact with no claim to
-describing the true curve shape beyond the data used to fit it, so any
-signal built on it is unreliable almost by definition.
-\item \textbf{Belly-of-curve smoothing (6--9Y).} This is the more
-substantive finding. The original Q1.2 ``cheap'' signal in 6--9Y was driven,
-at least in part, by the \emph{same} idiosyncratic legacy-bond noise
-identified in Q2.1's residual analysis. Once the spline smooths through
-that local bump, the belly of the curve actually looks \emph{rich}, not
-cheap, relative to the DB model.
+\item \textbf{Extrapolation risk (1Y and 25Y).} These points are outside
+$[2,20]$y. Their spline estimates depend on end-cubic continuation, so the
+resulting comparisons require explicit tail assumptions; extrapolation
+alone does not prove that an estimate is invalid.
+\item \textbf{Interpolation effect (6--9Y).} At 6, 7, 8 and 9Y, the spline
+lies respectively $3.78$, $10.08$, $15.03$ and $14.05$ bp below the bootstrap.
+These differences exceed the corresponding positive bootstrap-minus-DB
+gaps and reverse their signs. This is an effect of the five-anchor
+interpolation, not evidence that later high-coupon bonds caused noise in
+the earlier bootstrap yields.
 \end{enumerate}
 
-\textbf{Conclusion.} The trading conclusion from Q1.2 is \emph{not robust}
-to the choice of curve-fitting methodology in exactly the region (6--9Y)
-where the raw bootstrap is most likely contaminated by non-fundamental,
-bond-specific noise. A prudent trader would treat the raw-bootstrap BUY
-signal in 6--9Y with real skepticism, and would want to understand
-\emph{why} those bonds are mispriced (liquidity? embedded option? stale
-quote?) before trading on it, rather than assuming genuine relative value.
+\textbf{Conclusion.} The comparison is sensitive to curve construction.
+Substituting spline estimates for market-implied yields changes the object
+being compared with DB. The six reversals do not establish that the
+bootstrap is erroneous, that the spline removes noise or that a spline-based
+SELL is superior to the original BUY candidate. Trading conclusions require
+consistent cash-flow pricing and an assessment of model risk and costs.
 
 %--------------------------------------------------------------------
+
 \question{Q3.1 --- Nelson-Siegel-Svensson fit}
-
-\textbf{Methodology.} Jointly estimating $(\beta_0,\beta_1,\beta_2,\beta_3,
-\tau_1,\tau_2)$ by unconstrained nonlinear least squares proved numerically
-fragile: this curve is concave with a single mild hump and no second hump,
-so $\beta_0$ (level) and $\beta_2$ (curvature) become highly collinear once
-$\tau_1$ is pushed above $\sim$10 years (the curvature loading then barely
-decays within our 26-year range). Different, equally-well-fitting local
-optima emerged from different starting points.
-
-We instead use the standard \textbf{Diebold--Li two-step procedure}: for
-each candidate $(\tau_1,\tau_2)$ on a fine grid, the loadings become fixed
-basis functions of maturity, so the betas enter \emph{linearly} and are
-solved by OLS --- a well-posed, unique, convex problem for every candidate
-$\tau$. We then pick the $(\tau_1,\tau_2)$ minimizing total RSS.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.78\textwidth]{q3_nss_fit.png}
-\caption{Nelson-Siegel fit vs. the Q1.1 bootstrapped curve.}
-\end{figure}
-
-\textbf{Model selection.} The plain 3-factor Nelson-Siegel achieves RMSE
-$=7.96$ bps ($\beta_0=0.695\%$, $\beta_1=-0.140\%$, $\beta_2=17.926\%$,
-$\tau_1=12.08$y). The full 4-factor Svensson only improves RMSE to $7.28$
-bps (an improvement of $0.68$ bps), below our pre-set materiality threshold
-of 1.5 bps. We therefore adopt the \textbf{simpler, better-identified
-3-factor Nelson-Siegel model}: the data show no evidence of a genuine
-second hump, so the extra parameter and its attendant identification
-problems are not worth the marginal fit improvement.
-
-\begin{table}[h]
-\centering
-\small
-\begin{tabular}{lr}
+ 
+\textbf{What is estimated.} The question asks for the \emph{discount function}. We estimate it in
+spot-rate space and map back, keeping the Q1.1 bond-equivalent-yield convention throughout so that
+every comparison with the bootstrap is apples-to-apples:
+\[
+  D(m)=\Bigl(1+\tfrac{y(m)}{2}\Bigr)^{-2m},
+  \qquad
+  y(m)=\beta_0+\beta_1\Lambda_1(m)+\beta_2\Lambda_2(m)+\beta_3\Lambda_3(m),
+\]
+\[
+  \Lambda_1(m)=\frac{1-e^{-m/\tau_1}}{m/\tau_1},
+  \qquad
+  \Lambda_2(m)=\Lambda_1(m)-e^{-m/\tau_1},
+  \qquad
+  \Lambda_3(m)=\frac{1-e^{-m/\tau_2}}{m/\tau_2}-e^{-m/\tau_2}.
+\]
+Setting $\beta_3=0$ gives the three-factor Nelson-Siegel (NS) model; retaining it gives the
+four-factor Svensson (NSS) extension. $\Lambda_1$ decays monotonically from $1$ to $0$, so $\beta_1$
+is a short-end (slope) factor; $\Lambda_2$ is zero at both ends and peaks at $m^\star=1.7933\,\tau_1$,
+so $\beta_2$ bends only the belly; the loading on $\beta_0$ is constant, so $\beta_0=y(\infty)$ is the
+asymptotic long rate.
+ 
+\textbf{Methodology.} Estimating $(\beta_0,\beta_1,\beta_2,\beta_3,\tau_1,\tau_2)$ jointly by
+unconstrained nonlinear least squares proved numerically fragile: different starting points converged
+to different, equally-well-fitting local optima. The cause is a near-linear dependence among the
+loadings once $\tau_1$ is large relative to the sample. Regressing the curvature loading on the other
+two over our $0.5$--$26$y grid:
+ 
+\begin{center}
+\begin{tabular}{lccc}
 \toprule
-Parameter & Value \\
+$\tau_1$ & $R^2$ of $\Lambda_2$ on $[1,\Lambda_1]$ & $\operatorname{cond}(X)$ & $\operatorname{corr}(\Lambda_1,\Lambda_2)$ \\
 \midrule
-$\beta_0$ (level)     & 0.695\% \\
-$\beta_1$ (slope)     & $-0.140\%$ \\
-$\beta_2$ (curvature) & 17.926\% \\
-$\tau_1$              & 12.081 years \\
-RMSE                  & 7.96 bps \\
+ 2.00 y & 0.389 & 19.0 & $+0.62$ \\
+  5.00 y & 0.099 & 22.5 & $-0.31$ \\
+12.08 y & \textbf{0.905} & \textbf{60.8} & $\mathbf{-0.95}$ \\
+20.00 y & 0.976 & 139.5 & $-0.99$ \\
 \bottomrule
 \end{tabular}
-\caption{Final adopted Nelson-Siegel parameters.}
-\end{table}
-
-%--------------------------------------------------------------------
-\question{Q3.2 --- Factor loadings and economic drivers}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.78\textwidth]{q3_nss_loadings.png}\\[0.3cm]
-\includegraphics[width=0.78\textwidth]{q3_nss_contributions.png}
-\caption{Top: factor loadings. Bottom: factor contributions ($\beta_i \times$ loading$_i$).}
+\end{center}
+ 
+\noindent At $\tau_1\approx12$y the curvature loading is over $90\%$ explained by a linear combination
+of the level and slope loadings, so the three betas are not separately identified.
+ 
+We therefore \textbf{concentrate the betas out of the objective} (profiled, or variable-projection,
+least squares). Conditional on $(\tau_1,\tau_2)$ the loadings are fixed basis functions of maturity,
+the betas enter linearly, and the inner problem is an OLS regression with a unique closed-form
+solution; only the low-dimensional $\tau$ problem is searched, on a grid of
+$\tau_1\in[0.3,25]$y (500 points, step $0.049$y) for the three-factor model
+and a $80\times80$ grid over $\tau_1\in[0.3,15]$y, $\tau_2\in[2,30]$y for Svensson, excluding
+$|\tau_1-\tau_2|<0.5$y to avoid the degenerate $\tau_1\simeq\tau_2$ corner. This is the estimator of Nelson \&
+Siegel (1987), systematised by Gilli, Gro\ss e \& Schumann (2010). Diebold \& Li (2006) instead
+\emph{fix} $\lambda=1/\tau_1=0.0609$ a priori --- placing the curvature peak at 30 months --- so that
+no search is needed at all; we borrow that device below.
+ 
+\textbf{Estimation choices (documented).}
+\begin{enumerate}\itemsep2pt
+  \item \textbf{Objective.} Equally weighted squared errors on \emph{zero-coupon yields}, not on
+        prices. Yield-space weighting treats every maturity alike; price-space weighting would let
+        the long end dominate through its duration and would effectively re-weight towards the
+        legacy high-coupon bonds identified in Q2.1.
+  \item \textbf{Convention.} BEY (semi-annual) throughout, matching Q1.1--Q1.2.
+  \item \textbf{Sample.} All 52 bootstrapped nodes, $m=0.5,\dots,26$y. No outlier is removed: the
+        9--13y pricing anomaly is left in so that its effect on the fit is visible.
+  \item \textbf{$\tau$ selection.} Profiled RSS minimisation, \emph{plus} a constrained variant with
+        $\tau_1$ restricted to the conventional short-end range. Both are reported, for the reason
+        given under ``Identification'' below.
+  \item \textbf{Factor count.} Three versus four, decided below.
+\end{enumerate}
+ 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{q3_nss_fit.png}
+  \caption{Nelson-Siegel fit vs.\ the Q1.1 bootstrapped curve.}
+  \label{fig:ns-fit}
 \end{figure}
-
-The contribution decomposition reveals a striking feature: the
-\textbf{curvature} factor ($\beta_2=17.9\%$) does almost all of the
-curve-shaping work, rising smoothly from 0 at $m=0$ to its asymptote around
-20 years, while the level contribution is small and essentially flat
-($0.695\%$) and the slope contribution is tiny and nearly flat
-($-0.140\%$). This is counter-intuitive at first glance --- in textbook
-Nelson-Siegel intuition, ``level'' should dominate a curve of this overall
-magnitude --- but it is a direct, mechanical consequence of $\tau_1$ being
-large ($12.08$ years) relative to our 26-year maturity range: the curvature
-loading function $\left[\frac{1-e^{-m/\tau_1}}{m/\tau_1}-e^{-m/\tau_1}\right]$
-simply has not decayed back to zero by $m=26$, so it is statistically
-\emph{behaving like} a second, slowly-varying level/slope factor over the
-range of our data, and the OLS step naturally loads most of the explanatory
-power onto it rather than onto $\beta_0$ precisely because $\beta_0$'s
-loading is flat and uninformative about curve \emph{shape}, whereas the
-curvature loading can trace the whole concave shape on its own.
-
-Economically, this echoes Deutsche Bank's own Exhibit 3 three-factor model
-description: a persistent, long-horizon ``long-rate''/level-type factor
-that evolves slowly is naturally captured by a Nelson-Siegel factor whose
-decay parameter is large relative to the fitting window, rather than by the
-model's nominal level factor, which by construction carries no shape
-information at all. In other words, when the sample's maturity range is not
-much longer than $\tau_1$, Nelson-Siegel's ``curvature'' factor and a
-slow-moving macro ``long rate'' factor become difficult to tell apart ---
-exactly the level/curvature identifiability issue we had already flagged
-during estimation (Q3.1).
-
+ 
+\textbf{Identification: the profiled optimum is not economically interpretable.} The profiled RSS
+surface is nearly flat in $\tau_1$, while the betas move enormously along that ridge:
+ 
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+$\tau_1$ & $\beta_0$ (level) & $\beta_1$ (slope) & $\beta_2$ (curvature) & RMSE \\
+\midrule
+ 2.0 y & $6.951\%$ & $-6.413\%$ & $-3.871\%$ & $12.20$ bps \\
+ 5.0 y & $6.730\%$ & $-6.506\%$ & $+3.445\%$ & $12.08$ bps \\
+ 9.0 y & $4.254\%$ & $-3.817\%$ & $+10.982\%$ & $8.58$ bps \\
+12.08 y (profiled optimum) & $0.695\%$ & $-0.140\%$ & $+17.926\%$ & $7.96$ bps \\
+\bottomrule
+\end{tabular}
+\end{center}
+ 
+\noindent The profiled optimum does fit better --- by $4.1$ bps of RMSE against the best fit with an
+interpretable $\tau_1$ --- but it buys that fit by abandoning the factor interpretation entirely.
+Taken at face value it states that the asymptotic long rate is $0.695\%$, against a bootstrapped
+26Y yield of $5.905\%$, and that the slope factor, which must account for the $500\,$bp rise from
+the short end to the long end, is $-14\,$bp. Neither is an economically meaningful magnitude.
+ 
+Against that, $4.1$ bps has to be judged on the scale of the errors this fit already carries: the
+maximum residual is $32.5$ bps at $10.5$Y, in the 9--13y window that Q2.1 attributes to
+idiosyncratic legacy-bond pricing rather than to curve shape. The extra fit bought by a free
+$\tau_1$ is therefore well inside the data's own noise floor, while the cost --- a decomposition
+that means nothing --- is not. We report both fits and carry out the Q3.2 decomposition on the
+identified one.
+ 
+\textbf{Model selection: three or four factors?} The plain three-factor NS model achieves
+RMSE $=7.96$ bps; the four-factor Svensson improves this to $7.28$ bps
+--- but it does so with
+\[
+  \beta_0=-13.938\%,\quad \beta_1=+14.302\%,\quad \beta_2=+8.837\%,\quad
+  \beta_3=+54.892\%,\quad \tau_1=4.022\text{y},\quad \tau_2=16.886\text{y}.
+\]
+Formal tests favour the larger model: a nested $F$-test rejects NS at the $5\%$ level
+($F(2,46)=4.52$, $p=0.016$), and both AIC ($-734.1$ vs.\ $-739.4$) and BIC ($-726.3$ vs.\ $-727.7$)
+prefer Svensson.
+ 
+We adopt the three-factor model regardless, because the Svensson parameter vector is not a
+description of a second hump. Its asymptotic long rate is \emph{negative} ($-13.94\%$), held up by
+an offsetting $\beta_1$ of $+14.30\%$; and its second curvature factor carries a loading of
+$54.89\%$ with $\tau_2=16.886$y, placing that hump's peak at $1.7933\,\tau_2=30.3$ years --- four
+years beyond the longest bond in the sample. The fourth factor is thus a second \emph{out-of-sample}
+level factor, not a second hump: it is the same identification pathology as above, now with two
+decay parameters instead of one. The $0.68$ bps it buys also sits well inside the pricing noise
+documented in Q2.1, where residuals around the early-1980s high-coupon bonds reach $30$ bps. The
+$F$-test is measuring in-sample flexibility, not economic content.
+ 
+\begin{table}[htbp]
+  \centering
+  \begin{tabular}{lcc}
+    \toprule
+     & Profiled fit & Identified fit \\
+    Parameter & ($\tau_1$ free) & ($\tau_1$ constrained) \\
+    \midrule
+    $\beta_0$ (level)      & $0.695\%$      & $6.913\%$ \\
+    $\beta_1$ (slope)      & $-0.140\%$     & $-6.260\%$ \\
+    $\beta_2$ (curvature)  & $17.926\%$     & $-4.598\%$ \\
+    $\tau_1$               & $12.081$ y     & $1.834$ y \\
+    Curvature peak $1.7933\,\tau_1$ & $21.7$ y & $3.3$ y \\
+    RMSE                   & $7.96$ bps     & $12.10$ bps \\
+    \midrule
+    Implied $y(\infty)=\beta_0$ & $0.695\%$ & $6.913\%$ \\
+    Implied $y(0)=\beta_0+\beta_1$ & $0.554\%$ & $0.654\%$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Nelson-Siegel parameters: profiled optimum vs.\ identified fit. Bootstrapped reference
+           points: $y(0.5)=0.882\%$, $y(26)=5.905\%$.}
+  \label{tab:ns-params}
+\end{table}
+ 
+\textbf{Fit quality and the implied discount function.} Mapping the fitted yields back through
+$D(m)=(1+y(m)/2)^{-2m}$:
+ 
+\begin{center}
+\begin{tabular}{rrrrr}
+\toprule
+$m$ (y) & $y_{\mathrm{NS}}(m)$ & $D_{\mathrm{NS}}(m)$ & $D_{\mathrm{boot}}(m)$ & diff \\
+\midrule
+ 0.5 & $0.918\%$ & $0.99543$ & $0.99561$ & $-0.00018$ \\
+ 1.0 & $1.262\%$ & $0.98750$ & $0.98818$ & $-0.00068$ \\
+ 2.0 & $1.895\%$ & $0.96298$ & $0.96341$ & $-0.00043$ \\
+ 5.0 & $3.409\%$ & $0.84451$ & $0.84156$ & $+0.00295$ \\
+10.0 & $4.957\%$ & $0.61284$ & $0.62775$ & $\mathbf{-0.01492}$ \\
+15.0 & $5.702\%$ & $0.43029$ & $0.42935$ & $+0.00094$ \\
+20.0 & $5.962\%$ & $0.30880$ & $0.30947$ & $-0.00067$ \\
+25.0 & $5.941\%$ & $0.23141$ & $0.23299$ & $-0.00158$ \\
+26.0 & $5.915\%$ & $0.21969$ & $0.22024$ & $-0.00055$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+ 
+\noindent The residual is below $1$ bp over most of the curve but the fitted yield sits $24.6$ bps
+\emph{above} the bootstrap at 10Y, and $32.5$ bps above at $10.5$Y --- a discount factor wrong by
+two cents per dollar, the largest error in the fit. This is the \emph{same} 9--13y segment that
+generated the largest spline residuals in Q2.1. Two curve models of entirely different construction --- a local
+interpolant and a global three-parameter parametric form --- independently refuse to price those
+bonds. That is strong corroboration of the Q2.2 conclusion: the 6--9Y ``cheap'' signal of Q1.2
+reflects bond-specific noise in a handful of early-1980s high-coupon issues, not genuine relative
+value.
+ 
+\question{Q3.2 --- Factor loadings and economic drivers}
+ 
+\textbf{The loadings.} The three loadings are, by construction, orthogonal in \emph{shape} rather
+than in value: $\Lambda_0\equiv1$ is flat and shifts every maturity equally; $\Lambda_1$ falls
+monotonically from $1$ at $m=0$ to $0$ at $m=\infty$ and therefore moves only the short end; and
+$\Lambda_2$ is a hump, zero at both ends, peaking at
+\[
+  m^\star = 1.7933\,\tau_1 ,
+\]
+so it tilts the belly without disturbing either asymptote. This is what licenses the
+level/slope/curvature reading, and it holds only when $m^\star$ sits comfortably \emph{inside} the
+sample.
+ 
+\textbf{Why the profiled decomposition cannot be interpreted.} With $\tau_1=12.08$y the curvature
+loading peaks at $m^\star=21.7$ years and has fallen back only to $0.294$ by $m=26$ (it reaches
+$0.12$ at 100y and $0.02$ at 500y). Over the \emph{observed} range it is therefore monotone
+increasing and near-flat at the long end --- visually and statistically a second level/slope factor
+rather than a hump. The regression reported in Q3.1 quantifies this: $\Lambda_2$ is $90.5\%$
+explained by $[1,\Lambda_1]$. The least-squares step consequently loads almost all the explanatory
+power onto $\beta_2$ ($17.9\%$), leaving a level of $0.695\%$ and a slope of $-0.140\%$ that bear no
+relation to the curve's actual asymptote ($5.9\%$) or actual slope ($+500$ bps). The profiled fit is
+an excellent \emph{interpolant} and a meaningless \emph{decomposition}; Figure~\ref{fig:loadings-profiled}
+shows exactly this. We therefore decompose the identified fit of Table~\ref{tab:ns-params}.
+ 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.78\textwidth]{q3_nss_loadings.png}\\[6pt]
+  \includegraphics[width=0.78\textwidth]{q3_nss_contributions.png}
+  \caption{Loadings (top) and contributions $\beta_i\times\Lambda_i(m)$ (bottom) of the
+           \emph{profiled} fit, $\tau_1=12.08$y. The curvature loading does not peak until
+           $1.7933\,\tau_1=21.7$y, so over $[0,26]$y it is monotone and absorbs the level: the
+           grey level contribution is a flat $0.695\%$ and the red slope contribution is
+           indistinguishable from zero.}
+  \label{fig:loadings-profiled}
+\end{figure}
+ 
+ 
+\textbf{Economic drivers.} Settlement is 15 August 2003, and each factor maps onto a distinct
+macro-financial driver observable on that date.
+ 
+\begin{itemize}\itemsep3pt
+  \item \textbf{Level ($\beta_0=6.913\%$) --- long-run nominal anchor.} The asymptotic rate is the
+        sum of expected long-run real growth, expected long-run inflation and a term premium. None
+        of these responds to the business cycle, which is why the loading is flat: a repricing of
+        trend inflation moves the entire curve. Note that $6.91\%$ sits about $100$ bps above the
+        longest yield we observe ($5.905\%$ at 26Y): with $\tau_1$ short, the model extrapolates
+        the still-rising mid-curve out to infinity. $\beta_0$ should therefore be read as the
+        model's long-run anchor, not as a rate quoted anywhere in the market.
+  \item \textbf{Slope ($\beta_1=-6.260\%$) --- monetary policy stance.} $\beta_1=y(0)-y(\infty)$,
+        so a large negative $\beta_1$ is a very steep curve. In August 2003 the Fed funds target
+        stood at $1.00\%$ after the June 2003 cut, the trough of the post-dot-com easing cycle and
+        the lowest policy rate in 45 years, set against an explicit deflation scare earlier that
+        year. The fit implies $y(0)=\beta_0+\beta_1=0.654\%$, within $23$ bps of our bootstrapped
+        6-month yield of $0.882\%$ and consistent with a $1\%$ policy rate. The slope factor is
+        therefore measuring the gap between an emergency-low policy rate and an unchanged long-run
+        anchor: $626$ bps of expected normalisation.
+  \item \textbf{Curvature ($\beta_2=-4.598\%$, peaking at $3.3$y) --- the expected path, not the
+        endpoints.} Curvature captures the \emph{timing} of the normalisation priced by the slope
+        factor, and its sign here is informative: $\beta_2<0$ pushes the 2--5y sector \emph{below}
+        the path implied by level and slope alone, i.e.\ the market expects the Fed to stay low
+        first and move later, rather than to normalise at a constant exponential rate. That is
+        precisely the guidance in force at settlement: on 12 August 2003, three days before our
+        valuation date, the FOMC held the funds target at $1\%$ and stated that policy
+        accommodation could be maintained ``for a considerable period'' --- language that Fed funds
+        futures read as a commitment not to tighten for at least six months. A delayed-liftoff path
+        depresses the front belly exactly where $\Lambda_2$ loads most heavily.
+ 
+        The same sector is where convexity flows were concentrated: between mid-June and mid-August
+        2003 the 10Y yield rose roughly 150 bps as mortgage servicers sold duration into a falling
+        market. That is the 5--10y region in which our residuals are largest ($+32.5$ bps at
+        $10.5$Y), which is why we read the curvature factor as the policy-path signal and treat the
+        9--13y residual as bond-specific noise rather than curve shape.
+\end{itemize}
+ 
+\textbf{Relation to Deutsche Bank's model.} This is the same decomposition logic as DB's
+three-factor model in Exhibit 3, and it explains why DB calibrates to the 2Y and 10Y points
+(Q1.1): two maturities pin down slope and curvature given a level anchored by the long end. It also
+explains the Q1.2 pattern. A three-factor model cannot reproduce idiosyncratic, bond-specific
+deviations by construction, so any residual between DB's model and the market is either genuine
+relative value or bond-specific noise --- and Q2.2 plus the 10Y discount-factor residual above both
+point to the latter in the 6--9Y sector.
+ 
+\textbf{Caveat carried forward.} The identification problem of Q3.1 is not an artefact of our
+estimator; it is a property of fitting a three-factor exponential model on a sample whose maturity
+range is not much longer than $\tau_1$. When $m^\star$ approaches the long end of the data, the
+``curvature'' factor and a slow-moving long-rate factor become observationally equivalent. Any
+practitioner tracking NS betas through time must therefore fix $\tau_1$ (as Diebold \& Li do) rather
+than re-optimise it each period, or the resulting beta series will be contaminated by movements in
+$\tau$ masquerading as movements in level and curvature.
+ 
 %--------------------------------------------------------------------
 \question{Q4 --- Answer summary}
 
