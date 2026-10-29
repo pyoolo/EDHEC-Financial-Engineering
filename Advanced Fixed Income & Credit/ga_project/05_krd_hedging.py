@@ -40,9 +40,9 @@ Methodology & documented assumptions:
     to matter (both are printed, so the text can quote them consistently).
   - Robustness: outputs/q4_2_robustness.csv recomputes the 10Y KRD under every
     defensible convention (spline vs tent shock, bootstrapped vs spline-priced
-    base, cubic vs flat vs linear extrapolation, single-point bump, equal-face
-    portfolio); outputs/q4_3_extrapolation_sensitivity.csv does the same for
-    the five key-rate KRDs beyond the 20y knot.
+    base, cubic vs flat beyond 20y vs linear extrapolation, single-point bump,
+    equal-face portfolio); outputs/q4_3_extrapolation_sensitivity.csv does the
+    same for the five key-rate KRDs beyond the 20y knot.
   - Yields are Bond-Equivalent Yields (semi-annual compounding), as in Q1.1.
 """
 from pathlib import Path
@@ -121,7 +121,8 @@ port_cf = (face / 100.0) @ CF                                   # portfolio cash
 
 # Alternative reading of "equally invested": equal FACE in each bond ($1M/52 of
 # face, i.e. a market value of $1.19M). Kept only for the robustness table: it
-# overweights the cheap short bonds relative to the expensive long ones.
+# weights each bond by its price, overweighting the high-coupon 10.5-20y bonds
+# (prices 130-174) relative to the near-par short bonds (~103).
 face_eq = np.full(n_bonds, NAV_TARGET / n_bonds)
 port_cf_eq = (face_eq / 100.0) @ CF
 
@@ -186,11 +187,13 @@ def krd_from(base_y, dy, h=SHOCK, pcf_local=None):
             'KRD_years': -(up - dn) / (2 * P * h),
             'DV01': -(up - dn) / (2 * h) * 1e-4}
 
-def flat_ext(dy):
-    """Hold the spline yield FLAT outside [2,20]y: the shock is zero there."""
-    out = dy.copy()
-    out[(t < KNOTS[0]) | (t > KNOTS[-1])] = 0.0
-    return out
+def flat_tail_shock(j, size=SHOCK):
+    """Bump knot j and re-fit. Beyond 20Y the outermost knot owns the tail
+    (shock held at +size); the other four are held flat (zero). Below 2Y the
+    end cubic is kept, as in Q4.1. The five shocks still sum to a parallel shift."""
+    dy = spline_shock(j, size).copy()
+    dy[t > KNOTS[-1]] = size if j == len(KNOTS) - 1 else 0.0
+    return dy
 
 def linear_ext(j):
     """Extend the spline shock beyond the outer knots along the boundary slope."""
@@ -276,7 +279,7 @@ variants = [
     ('Spline refit, spline-priced base', krd_from(y_spline, d10)),
     ('Tent, bootstrapped base', krd_from(y_boot, tnt[j10])),
     ('Tent, spline-priced base', krd_from(y_spline, tnt[j10])),
-    ('Spline refit, flat extension outside [2,20]y', krd_from(y_boot, flat_ext(d10))),
+    ('Spline refit, tail held flat beyond 20Y', krd_from(y_boot, flat_tail_shock(j10))),
     ('Spline refit, linear extension outside [2,20]y', krd_from(y_boot, linear_ext(j10))),
     ('Single-point 10Y bump (10Y zero yield only)', krd_from(y_boot, dy_10_only)),
     ('Equal-FACE portfolio, bootstrapped base', krd_from(y_boot, d10, pcf_local=port_cf_eq)),
@@ -286,8 +289,8 @@ rob = pd.DataFrame([{'Variant': v, 'Base_NAV_$': a['P0'], 'PnL_up_$': a['PnL_up'
 rob.to_csv(OUT / 'q4_2_robustness.csv', index=False)
 print("Q4.2 robustness -- the KRD is robust to the pricing engine, not to the shock design:")
 print(rob.round(3).to_string(index=False))
-print(f"  Range of defensible conventions: {rob['KRD_years'].iloc[:4].min():.2f}-"
-      f"{rob['KRD_years'].iloc[:4].max():.2f}y; single-point bump is a partial duration, not a KRD.\n")
+print(f"  Range of knot-based conventions: {rob['KRD_years'].iloc[:6].min():.2f}-"
+      f"{rob['KRD_years'].iloc[:6].max():.2f}y; single-point bump is the zero-yield KRD of Q4.3(a), not the knot KRD.\n")
 
 # ================= Q4.3 (a): the 5 key rates =================
 rows = []
@@ -312,18 +315,19 @@ print(f"  Sum of one-sided key-rate P&Ls = ${krd_df['Spline_PnL_$'].sum():,.2f} 
 assert abs(krd_df['Spline_KRD_years'].sum() - eff_dur) < 0.05
 
 # --- where the 15Y/20Y split comes from: sensitivity to the >20y extension -----
+assert np.allclose(sum(flat_tail_shock(j) for j in range(5)), SHOCK), "Flat-tail shocks do not sum to a parallel shift"
 sens = pd.DataFrame([{'KeyRate': k,
                       'EndCubic_KRD': krd(spl[j])['KRD_years'],
-                      'HeldFlat_KRD': krd(flat_ext(spl[j]))['KRD_years']}
+                      'FlatTail_KRD': krd(flat_tail_shock(j))['KRD_years']}
                      for j, k in enumerate(KNOTS)])
 sens.to_csv(OUT / 'q4_3_extrapolation_sensitivity.csv', index=False)
 print("\nQ4.3 -- sensitivity of the key-rate profile to the >20y extension:")
 print(sens.round(3).to_string(index=False))
-print(f"  sums: end cubic {sens['EndCubic_KRD'].sum():.4f}y vs flat {sens['HeldFlat_KRD'].sum():.4f}y "
+print(f"  sums: end cubic {sens['EndCubic_KRD'].sum():.4f}y vs flat tail {sens['FlatTail_KRD'].sum():.4f}y "
       f"(effective duration {eff_dur:.4f}y).")
-print("  Holding the curve flat removes ~1.57y of cash-flow duration beyond 20y from the key-rate")
-print("  buckets, so the flat KRDs no longer sum to duration: the end-cubic extension is what makes")
-print("  the five shocks sum to a parallel shift, and it is kept for that reason.\n")
+print("  Both conventions sum to a +50bps parallel shift at every maturity, so both give a complete")
+print("  decomposition; they differ only in how the extrapolated >20y tail is allocated between")
+print("  the 15Y and 20Y buckets (0.81/3.06y under the end cubic vs 1.85/2.09y under the flat tail).\n")
 
 x = np.arange(5); w = 0.38
 fig2, ax2 = plt.subplots(figsize=(4.65, 3.0), layout='constrained')
@@ -395,3 +399,12 @@ for j, k in enumerate(KNOTS):
 unh = nav(y_boot + SHOCK) - P0
 res.append(("Parallel", unh, unh + hedge_cf @ (disc(y_boot + SHOCK) - disc(y_boot))))
 print("  " + " | ".join(f"{k}: ${u:,.0f} -> ${h:,.0f}" for k, u, h in res))
+
+# Flat-tail hedge comparison (model-risk sensitivity of the hedge legs)
+fts = [flat_tail_shock(j) for j in range(5)]
+A_ft = np.array([[-(CF[i] @ (disc(y_boot + fts[j]) - disc(y_boot - fts[j]))) / (2 * SHOCK) * 1e-4
+                  for i in hedge_idx] for j in range(5)])
+target_ft = np.array([krd(fts[j])['DV01'] for j in range(5)])
+hedge_face_ft = -np.linalg.solve(A_ft, target_ft) * 100.0
+print("\n  [Flat-tail convention instead: face amounts "
+      + ", ".join(f"{k}Y ${f:,.0f}" for k, f in zip(KNOTS, hedge_face_ft)) + "]")
