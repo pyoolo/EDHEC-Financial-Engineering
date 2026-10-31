@@ -183,8 +183,9 @@ validity, not a riskless arbitrage in the classical sense.
 
 \textbf{Methodology.} Natural cubic spline (zero second derivative at the
 boundary knots) through the five knots specified (2, 5, 10, 15, 20 years),
-fit directly on the Q1.1 bootstrapped BEY yields. Outside $[2,20]$y the
-spline is extrapolated using its boundary slope.
+fit directly on the Q1.1 bootstrapped BEY yields. Natural endpoints are an
+explicit modelling choice, not SciPy's default. Outside $[2,20]$y the first
+or last cubic polynomial is continued; the tails are not generally linear.
 
 \begin{figure}[h]
 \centering
@@ -192,24 +193,30 @@ spline is extrapolated using its boundary slope.
 \caption{Cubic spline (red) vs. raw bootstrapped zero yields (grey dots). Shaded regions are extrapolated.}
 \end{figure}
 
-\textbf{Fit quality.} Within the knot range $[2,20]$y: mean residual
-$=-5.50$\,bps, std $=8.28$\,bps, max $|$residual$| = 29.91$\,bps. The
-residuals are \emph{not} randomly scattered: the largest errors cluster
-sharply between 7.5 and 13 years (up to $-30$\,bps at 11.5Y), exactly the
-maturity window in which Exhibit 1 contains several legacy, high-coupon
-bonds issued in the early 1980s (coupons of 13.25\%, 12.5\%, 11.25\%,
-10.625\%). These bonds plausibly carry idiosyncratic pricing noise (age,
-liquidity, possible embedded optionality/callability common to that
-vintage), which the raw bootstrap faithfully reproduces pointwise but which
-the smooth spline, by construction, averages away.
+\textbf{Fit quality.} For the 37 observations within $[2,20]$y, including
+the five anchors, the residual (spline minus bootstrap) has mean
+$-5.50$\,bps, sample standard deviation $8.28$\,bps and maximum absolute
+value $29.91$\,bps, attained at 11.5Y with a negative sign.
+The spline interpolates five selected yields exactly; it does not
+statistically estimate or average away noise. The high-coupon bonds cited
+in Exhibit 1 mature at 10.5--12Y, so they cannot determine earlier 6--9Y
+bootstrap yields in a successive-substitution procedure. The supplied
+evidence does not establish issuance vintage, liquidity or callability as
+the cause of the residuals.
 
 %--------------------------------------------------------------------
 \question{Q2.2 --- Does using the spline change the Q1.2 conclusions?}
 
+Spline estimates are useful at maturities without an observed point and
+when a continuous curve is required for valuation or scenario analysis.
+Replacing available market-implied yields with a five-anchor approximation
+is a modelling choice; the spline does not exactly reprice all input bonds.
+
 We repeat the Q1.2 comparison using the \textbf{spline-implied} yield
-(instead of the raw bootstrap) at every maturity used in the original
-table, since the spline value differs from the raw bootstrap except
-exactly at the five knots (2,5,10,15,20).
+instead of the bootstrap. The spline must match the five anchors
+(2,5,10,15,20Y) and may differ elsewhere. The table retains BUY/SELL as
+\emph{conditional, model-based labels}, with the Q1.2 reporting band:
+these are comparisons of curve estimates against DB, not new market quotes.
 
 \begin{table}[h]
 \centering
@@ -219,7 +226,7 @@ exactly at the five knots (2,5,10,15,20).
 Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Changed vs. Q1.2?} \\
 \midrule
 1  & 1.2443\% & 1.2846\% & $+4.03$  & BUY  & \textbf{YES} (was SELL) \\
-2  & 1.8727\% & 1.8727\% & $+0.02$  & fair & no (knot) \\
+2  & 1.8727\% & 1.8727\% & $+0.00$  & fair & no (knot) \\
 3  & 2.4110\% & 2.4608\% & $+4.98$  & BUY  & no \\
 4  & 2.9665\% & 3.0096\% & $+4.31$  & BUY  & no \\
 5  & 3.4454\% & 3.4799\% & $+3.45$  & BUY  & no (knot) \\
@@ -241,26 +248,24 @@ Maturity (y) & DB Model & Spline Yield & Diff (bps) & Spline Signal & \textit{Ch
 Two distinct mechanisms are at work:
 
 \begin{enumerate}[leftmargin=1.4em]
-\item \textbf{Extrapolation risk (1Y and 25Y).} These two points lie
-\emph{outside} the spline's knot range $[2,20]$y. The natural spline's
-boundary-slope extrapolation is a pure modelling artifact with no claim to
-describing the true curve shape beyond the data used to fit it, so any
-signal built on it is unreliable almost by definition.
-\item \textbf{Belly-of-curve smoothing (6--9Y).} This is the more
-substantive finding. The original Q1.2 ``cheap'' signal in 6--9Y was driven,
-at least in part, by the \emph{same} idiosyncratic legacy-bond noise
-identified in Q2.1's residual analysis. Once the spline smooths through
-that local bump, the belly of the curve actually looks \emph{expensive}, not
-cheap, relative to the DB model.
+\item \textbf{Extrapolation risk (1Y and 25Y).} These points are outside
+$[2,20]$y. Their spline estimates depend on end-cubic continuation, so the
+resulting comparisons require explicit tail assumptions; extrapolation
+alone does not prove that an estimate is invalid.
+\item \textbf{Interpolation effect (6--9Y).} At 6, 7, 8 and 9Y, the spline
+lies respectively $3.78$, $10.08$, $15.03$ and $14.05$ bp below the bootstrap.
+These differences exceed the corresponding positive bootstrap-minus-DB
+gaps and reverse their signs. This is an effect of the five-anchor
+interpolation, not evidence that later high-coupon bonds caused noise in
+the earlier bootstrap yields.
 \end{enumerate}
 
-\textbf{Conclusion.} The trading conclusion from Q1.2 is \emph{not robust}
-to the choice of curve-fitting methodology in exactly the region (6--9Y)
-where the raw bootstrap is most likely contaminated by non-fundamental,
-bond-specific noise. A prudent trader would treat the raw-bootstrap BUY
-signal in 6--9Y with real skepticism, and would want to understand
-\emph{why} those bonds are mispriced (liquidity? embedded option? stale
-quote?) before trading on it, rather than assuming genuine relative value.
+\textbf{Conclusion.} The comparison is sensitive to curve construction.
+Substituting spline estimates for market-implied yields changes the object
+being compared with DB. The six reversals do not establish that the
+bootstrap is erroneous, that the spline removes noise or that a spline-based
+SELL is superior to the original BUY candidate. Trading conclusions require
+consistent cash-flow pricing and an assessment of model risk and costs.
 
 %--------------------------------------------------------------------
 
@@ -317,20 +322,22 @@ $\tau_1\in[0.3,25]$y (500 points, step $0.049$y) for the three-factor model
 and a $80\times80$ grid over $\tau_1\in[0.3,15]$y, $\tau_2\in[2,30]$y for Svensson, excluding
 $|\tau_1-\tau_2|<0.5$y to avoid the degenerate $\tau_1\simeq\tau_2$ corner. This is the estimator of Nelson \&
 Siegel (1987), systematised by Gilli, Gro\ss e \& Schumann (2010). Diebold \& Li (2006) instead
-\emph{fix} $\lambda=1/\tau_1=0.0609$ a priori --- placing the curvature peak at 30 months --- so that
-no search is needed at all; we borrow that device below.
+\emph{fix} $\lambda=1/\tau_1=0.0609$ a priori --- placing the curvature peak at 30 months, i.e.\
+$\tau_1=1.37$y --- so that no search is needed at all. We borrow that device in the constrained
+variant below, which restricts $\tau_1$ to $[1.0,3.5]$y, a band centred on the Diebold--Li value.
  
 \textbf{Estimation choices (documented).}
 \begin{enumerate}\itemsep2pt
   \item \textbf{Objective.} Equally weighted squared errors on \emph{zero-coupon yields}, not on
         prices. Yield-space weighting treats every maturity alike; price-space weighting would let
         the long end dominate through its duration and would effectively re-weight towards the
-        legacy high-coupon bonds identified in Q2.1.
+        10.5--12Y high-coupon bonds cited in Exhibit~1.
   \item \textbf{Convention.} BEY (semi-annual) throughout, matching Q1.1--Q1.2.
   \item \textbf{Sample.} All 52 bootstrapped nodes, $m=0.5,\dots,26$y. No outlier is removed: the
         9--13y pricing anomaly is left in so that its effect on the fit is visible.
-  \item \textbf{$\tau$ selection.} Profiled RSS minimisation, \emph{plus} a constrained variant with
-        $\tau_1$ restricted to the conventional short-end range. Both are reported, for the reason
+  \item \textbf{$\tau$ selection.} Profiled RSS minimisation over the full grid, \emph{plus} a
+        constrained variant with $\tau_1$ restricted to $[1.0,3.5]$y --- the conventional short-end
+        range, bracketing the Diebold--Li value $\tau_1=1.37$y. Both are reported, for the reason
         given under ``Identification'' below.
   \item \textbf{Factor count.} Three versus four, decided below.
 \end{enumerate}
@@ -338,7 +345,8 @@ no search is needed at all; we borrow that device below.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.78\textwidth]{q3_nss_fit.png}
-  \caption{Nelson-Siegel fit vs.\ the Q1.1 bootstrapped curve.}
+  \caption{\emph{Profiled} Nelson-Siegel fit ($\tau_1=12.08$y, RMSE $7.96$ bps) vs.\ the Q1.1
+           bootstrapped curve. The identified fit of Table~\ref{tab:ns-params} is not plotted.}
   \label{fig:ns-fit}
 \end{figure}
  
@@ -358,17 +366,17 @@ $\tau_1$ & $\beta_0$ (level) & $\beta_1$ (slope) & $\beta_2$ (curvature) & RMSE 
 \end{tabular}
 \end{center}
  
-\noindent The profiled optimum does fit better --- by $4.1$ bps of RMSE against the best fit with an
-interpretable $\tau_1$ --- but it buys that fit by abandoning the factor interpretation entirely.
+\noindent The profiled optimum does fit better --- by $4.1$ bps of RMSE against the constrained fit
+with $\tau_1\in[1.0,3.5]$y --- but it buys that fit by abandoning the factor interpretation entirely.
 Taken at face value it states that the asymptotic long rate is $0.695\%$, against a bootstrapped
 26Y yield of $5.905\%$, and that the slope factor, which must account for the $500\,$bp rise from
 the short end to the long end, is $-14\,$bp. Neither is an economically meaningful magnitude.
  
 Against that, $4.1$ bps has to be judged on the scale of the errors this fit already carries: the
-maximum residual is $32.5$ bps at $10.5$Y, in the 9--13y window that Q2.1 attributes to
-idiosyncratic legacy-bond pricing rather than to curve shape. The extra fit bought by a free
-$\tau_1$ is therefore well inside the data's own noise floor, while the cost --- a decomposition
-that means nothing --- is not. We report both fits and carry out the Q3.2 decomposition on the
+maximum residual is $32.5$ bps at $10.5$Y, in the 10.5--11.5Y step that neither smooth model
+reproduces. The extra fit bought by a free $\tau_1$ is therefore of the same order as a feature
+neither functional form can represent in any case, while the cost --- a decomposition that means
+nothing --- is not. We report both fits and carry out the Q3.2 decomposition on the
 identified one.
  
 \textbf{Model selection: three or four factors?} The plain three-factor NS model achieves
@@ -388,8 +396,8 @@ an offsetting $\beta_1$ of $+14.30\%$; and its second curvature factor carries a
 $54.89\%$ with $\tau_2=16.886$y, placing that hump's peak at $1.7933\,\tau_2=30.3$ years --- four
 years beyond the longest bond in the sample. The fourth factor is thus a second \emph{out-of-sample}
 level factor, not a second hump: it is the same identification pathology as above, now with two
-decay parameters instead of one. The $0.68$ bps it buys also sits well inside the pricing noise
-documented in Q2.1, where residuals around the early-1980s high-coupon bonds reach $30$ bps. The
+decay parameters instead of one. The $0.68$ bps it buys is also small next to the
+$29.9$ bps maximum spline residual reported at $11.5$Y in Q2.1. The
 $F$-test is measuring in-sample flexibility, not economic content.
  
 \begin{table}[htbp]
@@ -397,7 +405,7 @@ $F$-test is measuring in-sample flexibility, not economic content.
   \begin{tabular}{lcc}
     \toprule
      & Profiled fit & Identified fit \\
-    Parameter & ($\tau_1$ free) & ($\tau_1$ constrained) \\
+    Parameter & ($\tau_1$ free) & ($\tau_1\in[1.0,3.5]$y) \\
     \midrule
     $\beta_0$ (level)      & $0.695\%$      & $6.913\%$ \\
     $\beta_1$ (slope)      & $-0.140\%$     & $-6.260\%$ \\
@@ -415,8 +423,8 @@ $F$-test is measuring in-sample flexibility, not economic content.
   \label{tab:ns-params}
 \end{table}
  
-\textbf{Fit quality and the implied discount function.} Mapping the fitted yields back through
-$D(m)=(1+y(m)/2)^{-2m}$:
+\textbf{Fit quality and the implied discount function.} Mapping the \emph{profiled} fitted yields
+back through $D(m)=(1+y(m)/2)^{-2m}$:
  
 \begin{center}
 \begin{tabular}{rrrrr}
@@ -436,14 +444,16 @@ $m$ (y) & $y_{\mathrm{NS}}(m)$ & $D_{\mathrm{NS}}(m)$ & $D_{\mathrm{boot}}(m)$ &
 \end{tabular}
 \end{center}
  
-\noindent The residual is below $1$ bp over most of the curve but the fitted yield sits $24.6$ bps
-\emph{above} the bootstrap at 10Y, and $32.5$ bps above at $10.5$Y --- a discount factor wrong by
-two cents per dollar, the largest error in the fit. This is the \emph{same} 9--13y segment that
-generated the largest spline residuals in Q2.1. Two curve models of entirely different construction --- a local
-interpolant and a global three-parameter parametric form --- independently refuse to price those
-bonds. That is strong corroboration of the Q2.2 conclusion: the 6--9Y ``cheap'' signal of Q1.2
-reflects bond-specific noise in a handful of early-1980s high-coupon issues, not genuine relative
-value.
+\noindent The residual is within about $7$ bps everywhere except the 9--12Y step, where the fitted
+yield sits $24.6$ bps \emph{above} the bootstrap at 10Y and $32.5$ bps above at $10.5$Y --- a
+discount factor wrong by about $1.5$ cents per dollar, the largest error in the fit. This is the
+\emph{same} 10.5--11.5Y step that generated the largest spline residuals in Q2.1. Two curve models
+of entirely different construction --- a local interpolant and a global three-parameter parametric
+form --- both fail to reproduce it, which shows the step is not a shape either functional form can
+represent. It does not establish what causes it: as Q2.1 notes, the supplied evidence does not
+identify issuance vintage, liquidity or callability. Nor does it bear on the 6--9Y signals of
+Q1.2, which Q2.2 attributes to the spline's own geometry --- the 10Y knot sits at the bottom of
+the step and pulls the spline down between 5Y and 10Y.
  
 \question{Q3.2 --- Factor loadings and economic drivers}
  
@@ -514,18 +524,18 @@ macro-financial driver observable on that date.
  
         The same sector is where convexity flows were concentrated: between mid-June and mid-August
         2003 the 10Y yield rose roughly 150 bps as mortgage servicers sold duration into a falling
-        market. That is the 5--10y region in which our residuals are largest ($+32.5$ bps at
-        $10.5$Y), which is why we read the curvature factor as the policy-path signal and treat the
-        9--13y residual as bond-specific noise rather than curve shape.
+        market. Our largest residuals ($+32.5$ bps at $10.5$Y) sit just beyond that region, in
+        the 10.5--11.5Y step that no smooth model reproduces; we therefore read the curvature
+        factor as the policy-path signal and leave the step's cause open.
 \end{itemize}
  
 \textbf{Relation to Deutsche Bank's model.} This is the same decomposition logic as DB's
-three-factor model in Exhibit 3, and it explains why DB calibrates to the 2Y and 10Y points
-(Q1.1): two maturities pin down slope and curvature given a level anchored by the long end. It also
+three-factor model in Exhibit 3, and it explains why DB calibrates to the one-month, 2Y and 10Y
+points (Q1.1): three maturities pin down level, slope and curvature. It also
 explains the Q1.2 pattern. A three-factor model cannot reproduce idiosyncratic, bond-specific
 deviations by construction, so any residual between DB's model and the market is either genuine
-relative value or bond-specific noise --- and Q2.2 plus the 10Y discount-factor residual above both
-point to the latter in the 6--9Y sector.
+relative value or bond-specific pricing --- and on the evidence available neither Q2.2 nor the
+10Y discount-factor residual above settles which of the two applies in the 6--9Y sector.
  
 \textbf{Caveat carried forward.} The identification problem of Q3.1 is not an artefact of our
 estimator; it is a property of fitting a three-factor exponential model on a sample whose maturity
@@ -540,15 +550,16 @@ $\tau$ masquerading as movements in level and curvature.
 
 \begin{center}
 \fbox{\parbox{0.94\textwidth}{\small
-\noindent\textbf{Q4.1.} A $+50$bps bump of the 10Y knot with the natural spline
-re-fitted raises the 10Y zero yield by exactly $50$bps and leaves the other
+\noindent\textbf{Q4.1.} A $+50$\,bp bump of the 10Y knot with the natural spline
+re-fitted raises the 10Y zero yield by exactly $50$\,bp and leaves the other
 four knots unchanged, but the shock is \emph{not} local: the curve ripples
-($+22.1$bps at 7Y, $-8.4$bps at 17Y, $-11.5$bps at 26Y).\\[3pt]
+($+22.1$\,bp at 7Y, $-8.4$\,bp at 17Y, $-11.5$\,bp at 26Y).\\[3pt]
 \textbf{Q4.2.} $\text{KRD}_{10Y}=2.21$ years $(\Delta P=-\$10{,}813.14$, i.e.\
 $-1.08\%$ of NAV; $\text{DV01}=\$221.0$ central, $\$216.3$ one-sided).\\[3pt]
 \textbf{Q4.3.} The 52 individual zero-yield KRDs sum to $7.981$ years, exactly
 the portfolio's effective duration; the aggregated key-rate profile is
-$0.37/1.54/2.21/0.81/3.06$ years at 2/5/10/15/20Y.
+$0.37/1.54/2.21/0.81/3.06$ years at 2/5/10/15/20Y (the 15Y/20Y split depends on
+the extrapolated tail: $1.85/2.09$ under a flat tail beyond 20Y).
 }}
 \end{center}
 
@@ -558,12 +569,12 @@ $0.37/1.54/2.21/0.81/3.06$ years at 2/5/10/15/20Y.
 \textbf{Methodology.} The Q2.1 curve is a natural cubic spline through the
 bootstrapped zero yields at the knots 2, 5, 10, 15 and 20y, which are exactly
 the assignment's key rates. We therefore implement ``shock the 10-year rate by
-50bps'' literally on that model: we add $+50$bps to the 10Y knot value,
+50\,bp'' literally on that model: we add $+50$\,bp to the 10Y knot value,
 \emph{re-fit} the natural spline, and define the curve shock as
 $$\Delta y(t) = S_{\text{bumped}}(t) - S_{\text{base}}(t), \qquad t = 0.5, 1.0, \dots, 26\text{y}.$$
 Because spline interpolation is linear in the knot values, $\Delta y(t)$ does
 not depend on the level of the curve, and the five key-rate shocks sum
-\emph{exactly} to a $+50$bps parallel shift at every maturity (verified in the
+\emph{exactly} to a $+50$\,bp parallel shift at every maturity (verified in the
 code). For comparison, we also run the textbook Ho (1992) triangular
 (``tent'') shock: full size at its own knot, decaying linearly to zero at the
 adjacent knots, and held flat beyond the outer knots.
@@ -577,23 +588,23 @@ unchanged. Right: the five spline key-rate shocks. Shaded areas: extrapolated
 maturities ($<2$y, $>20$y).}
 \end{figure}
 
-\textbf{Impact on the curve.} The shock is $+50$bps at 10Y and, by
+\textbf{Impact on the curve.} The shock is $+50$\,bp at 10Y and, by
 construction, zero at the other knots (2, 5, 15, 20y). However, unlike the
 tent, the spline response is \textbf{not local}:
 \begin{itemize}[nosep]
-\item Between 5Y and 15Y it is \emph{wider} than the tent: $+22.1$bps at 7y
-and $+37.0$bps at 12y, versus $+20$ and $+30$bps for the linear ramp.
+\item Between 5Y and 15Y it is \emph{wider} than the tent: $+22.1$\,bp at 7y
+and $+37.0$\,bp at 12y, versus $+20$ and $+30$\,bp for the linear ramp.
 \item Outside $[5,15]$y the cubic \emph{ripples} with alternating signs:
-about $-3$ to $-4$bps between 3 and 4y, $-8.4$bps at 17y, and $+8.4$bps at 23y.
+about $-3$\,bp between 3 and 4y, $-8.4$\,bp at 17y, and $+8.4$\,bp at 23y.
 \item In the \textbf{extrapolated} region beyond 20y the spline continues the
 last cubic polynomial --- the \texttt{CubicSpline} implementation extends the
 end cubic, it does not hold the curve flat --- so the ripple grows to
-$-11.5$bps at 26y. (A flat extension would put the 26Y yield at $5.95\%$
+$-11.5$\,bp at 26y. (A flat extension would put the 26Y yield at $5.95\%$
 instead of $6.35\%$ and would set this last contribution to zero; we keep the
 model-consistent extension and quantify the sensitivity in Q4.3.) The right
 panel shows that this effect is much stronger for the outer knots: a 20Y bump
-moves the 26y yield by about $+103$bps, a 15Y bump moves it by about
-$-44$bps, and a 2Y bump moves the 0.5y yield by $+79$bps.
+moves the 26y yield by about $+103$\,bp, a 15Y bump moves it by about
+$-44$\,bp, and a 2Y bump moves the 0.5y yield by $+79$\,bp.
 \end{itemize}
 
 \begin{table}[h]
@@ -603,13 +614,13 @@ $-44$bps, and a 2Y bump moves the 0.5y yield by $+79$bps.
 \toprule
 Maturity (y) & 2 & 3 & 5 & 7 & 10 & 12 & 15 & 17 & 20 & 23 & 26 \\
 \midrule
-$\Delta y$, spline re-fit (bps) & 0.0 & $-2.9$ & 0.0 & $+22.1$ & $+50.0$ & $+37.0$ & 0.0 & $-8.4$ & 0.0 & $+8.4$ & $-11.5$ \\
-$\Delta y$, tent (bps)          & 0.0 & 0.0 & 0.0 & $+20.0$ & $+50.0$ & $+30.0$ & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
+$\Delta y$, spline re-fit (bp) & 0.0 & $-2.9$ & 0.0 & $+22.1$ & $+50.0$ & $+37.0$ & 0.0 & $-8.4$ & 0.0 & $+8.4$ & $-11.5$ \\
+$\Delta y$, tent (bp)          & 0.0 & 0.0 & 0.0 & $+20.0$ & $+50.0$ & $+30.0$ & 0.0 & 0.0 & 0.0 & 0.0 & 0.0 \\
 \bottomrule
 \end{tabular}
-\caption{The $+50$bps 10Y shock at selected maturities: global spline re-fit
+\caption{The $+50$\,bp 10Y shock at selected maturities: global spline re-fit
 vs.\ the local triangular tent. $\Delta y$ is zero at 5Y and 15Y because the
-tent is a straight line between the knots; it is zero at 2, 5, 15 and 20Y for
+tent decays to zero at the adjacent knots; it is zero at 2, 5, 15 and 20Y for
 the re-fit because those knots are not moved.}
 \end{table}
 
@@ -626,9 +637,10 @@ an equal \emph{dollar market value}: \$1,000,000/52 $\approx$ \$19{,}230.77
 in each bond, i.e.\ a face amount of
 $(\text{dollar amount}/\text{price})\times 100$ per bond. The alternative
 reading, an equal \emph{face} amount (\$19{,}230.77 of face in each bond),
-would give a \$1.19m market value and $\text{KRD}_{10Y}=2.31$y: equal face
-overweights the cheap short bonds and underweights the expensive long ones,
-so it raises duration. We use equal market value, the standard reading of
+would give a \$1.19m market value and $\text{KRD}_{10Y}=2.31$y: with equal face,
+long bonds trading above par (10.5--20y, prices 130--174) get more market-value
+weight than near-par short bonds (about 103), shifting weight towards the
+10Y bucket and raising duration. We use equal market value, the standard reading of
 ``equally invested'', and report the alternative in the robustness table.
 
 \textbf{Approach.}
@@ -639,26 +651,41 @@ date.
 \item \emph{Base valuation} uses the Q1.1 bootstrapped zero curve (BEY,
 semi-annual compounding). It reprices every bond exactly, so the base NAV is
 exactly \$1,000,000. Pricing off the spline itself would give
-\$1,002,389, and the \$2,389 gap (the Q2.2 fitting residual) would
-contaminate the risk measure.
+\$1{,}002{,}389, and the $+\$2{,}389$ gap ($\text{spline NAV}-\text{bootstrap NAV}$,
+the Q2.2 fitting residual) would contaminate the risk measure.
 \item \emph{Shocked valuation}: add the spline-implied $\Delta y(t)$ from Q4.1
 to the bootstrapped yields and reprice. The shape of the shock therefore
 comes from the Q2.1 model, while the base level matches market prices.
-\item Report the result as (i) the dollar P\&L of the $+50$bps shock;
+\item Report the result as (i) the dollar P\&L of the $+50$\,bp shock;
 (ii) the KRD in years, using a central difference to strip out convexity,
-$\text{KRD}_k = -\dfrac{P(+h)-P(-h)}{2\,P_0\,h}$ with $h=50$bps; and
-(iii) the DV01 (\$ per 1bp), which is the quantity used to size hedges.
+$\text{KRD}_k = -\dfrac{P(+h)-P(-h)}{2\,P_0\,h}$ with $h=50$\,bp; and
+(iii) the DV01 (\$ per 1\,bp), which is the quantity used to size hedges.
 \end{enumerate}
 
+\textbf{The residual is held fixed.} With $s(t)$ the Q2.1 spline, $b(t)$ the
+Q1.1 bootstrap and $r(t)=b(t)-s(t)$, pricing the base at $b$ and the shocked
+book at $b+\Delta y$ is equivalent to assuming that $r(t)$ does not move when
+the knot does: the shock shifts the model curve and the bond-specific residual
+is carried unchanged. The assumption is deliberate --- it keeps $P_0$ at the
+\$1m actually invested and measures the sensitivity of that mark --- but it is
+an assumption. If the residual is a liquidity or rich--cheap premium that
+itself responds to the curve, the true exposure differs. The pure-model
+alternative ($r\equiv 0$, repricing off the spline) gives $2.234$y, $1.1\%$
+higher (robustness table below); the residual is small relative to a 50\,bp
+shock, which is why the choice barely matters.
+
 \textbf{Result.}
-$$\boxed{\Delta P_{10Y} = \$989{,}186.86 - \$1{,}000{,}000.00 = -\$10{,}813.14
-\;(-1.08\%\text{ of NAV}), \qquad \text{KRD}_{10Y} = 2.21\text{ years},
-\qquad \text{DV01}_{10Y} = \$221.0}$$
+$$\boxed{\begin{aligned}
+\Delta P_{10Y} &= \$989{,}186.86 - \$1{,}000{,}000.00 = -\$10{,}813.14
+\;(-1.08\%\text{ of NAV}), \\
+\text{KRD}_{10Y} &= 2.21\text{ years}, \qquad \text{DV01}_{10Y} = \$221.0
+\end{aligned}}$$
 The sign is as expected: a long bond portfolio loses value when yields rise.
 The \$221.0 is a \emph{central}-difference DV01,
-$\text{DV01}=-(P(+h)-P(-h))/2\times10^{-4}$; the \emph{one-sided} $+50$bps
+$\text{DV01}_{10Y}=-\dfrac{P(+h)-P(-h)}{2h}\times10^{-4}=\text{KRD}_{10Y}\times P_0\times10^{-4}$
+with $h=0.005$; the \emph{one-sided} $+50$\,bp
 P\&L implies \$216.26 per bp, so $\Delta P\neq-50\times\text{DV01}$. The
-\$4.8 per bp gap is the convexity term, which a 50bp move is large enough to
+\$4.8 per bp gap is the convexity term, which a 50\,bp move is large enough to
 reveal; we report the central figure because it is the one used to size the
 hedge in Q4.3.
 
@@ -671,32 +698,39 @@ implementations comes from:
 \small
 \begin{tabular}{lrr}
 \toprule
-Variant & $\Delta P$ for $+50$bps & $\text{KRD}_{10Y}$ (yrs) \\
+Variant & $\Delta P$ for $+50$\,bp & $\text{KRD}_{10Y}$ (yrs) \\
 \midrule
 Spline re-fit, bootstrapped base (\textbf{reported}) & $-\$10{,}813$ & 2.210 \\
 Spline re-fit, spline-priced base & $-\$10{,}954$ & 2.234 \\
 Triangular tent, bootstrapped base & $-\$10{,}123$ & 2.061 \\
 Triangular tent, spline-priced base & $-\$10{,}232$ & 2.078 \\
+Spline re-fit, linear extension outside $[2,20]$y & $-\$12{,}279$ & 2.511 \\
 Single-point 10Y bump (10Y zero yield only) & $-\$1{,}169$ & 0.240 \\
 Equal-face portfolio, bootstrapped base & $-\$13{,}445$ & 2.307 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Every defensible convention puts the 10Y exposure between $2.0$ and $2.4$
-years; the spread is methodological, not arithmetic. We report $2.21$y
+Every knot-based convention puts the 10Y exposure between $2.0$ and $2.5$
+years ($2.06$--$2.51$y); the spread is methodological, not arithmetic. We report $2.21$y
 because (i) Q4.1 asks for the impact on the curve \emph{estimated in Q2.1},
 which is the re-fitted spline, and (ii) pricing the base off the bootstrap
-keeps $P_0$ exactly at the $\$1$m actually invested, so the $-\$2{,}389$ Q2.2
-fitting residual cannot leak into the risk measure. The $0.24$y row shows the
-opposite extreme: applying the shock to the single 10Y zero yield only
-measures the partial duration of one cash-flow date, not a key-rate duration.
+keeps $P_0$ exactly at the $\$1$m actually invested, so the $+\$2{,}389$ Q2.2
+fitting residual ($\text{spline NAV}-\text{bootstrap NAV}$) cannot leak into the risk measure.
+
+\textbf{Two senses of ``key rate''.} A key-rate duration is the sensitivity to
+a one-unit move in one coordinate of the curve. The coordinate can be a knot of
+a curve model, in which case the shock drags neighbouring yields with it
+($2.21$y here), or a single zero yield, in which case only that discount factor
+moves ($0.24$y). Q4.3(a) computes the second object for all 52 dates, so the
+$0.24$y row is its 10Y entry, not an error: the two numbers differ by a factor
+of nine because the knot shock also moves the 5--15y curve.
 
 %--------------------------------------------------------------------
 \question{Q4.3 --- Full key-rate duration profile}
 
 \textbf{(a) Each of the 52 zero-coupon yields individually (the literal
-reading).} ``All maturities'' is read as applying the same $+50$bps shock to
+reading).} ``All maturities'' is read as applying the same $+50$\,bp shock to
 each semi-annual zero yield (0.5y to 26y) \emph{on its own}, leaving the other
 51 unchanged. This version needs no curve model: only the discount factor of
 that single date moves, so to first order the KRD at date $t$ is
@@ -706,12 +740,12 @@ $[t/(1+y_t/2)]\times\text{PV}(\text{CF}_t)/\text{NAV}$ in BEY terms).
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.8\textwidth]{q4_3_krd_by_maturity.png}
-\caption{KRD to each individual zero-coupon yield ($+50$bps). The 52 bars sum
+\caption{KRD to each individual zero-coupon yield ($+50$\,bp). The 52 bars sum
 to 7.981 years, the portfolio's effective duration.}
 \end{figure}
 
 \textbf{Additivity check.} The 52 KRDs sum to $7.9809$ years, exactly the
-effective duration of a $\pm50$bps parallel shift: a parallel shift is the
+effective duration of a $\pm50$\,bp parallel shift: a parallel shift is the
 sum of the 52 single-date shocks, so this check needs no curve model and is
 free of cross terms.
 
@@ -723,7 +757,7 @@ above par (up to 174), so an equal \emph{dollar} allocation buys less face
 --- hence less principal --- at those dates. Beyond 10.5y the exposure
 declines slowly as discounting erodes the PV of distant cash flows.
 
-\textbf{(b) The five key rates (aggregated view).} We apply the same $+50$bps
+\textbf{(b) The five key rates (aggregated view).} We apply the same $+50$\,bp
 re-fit shock to each knot in turn.
 
 \begin{table}[h]
@@ -745,7 +779,7 @@ Sum & $-37{,}704$ & 7.992 & 799.2 & & $-38{,}872$ & 7.979 \\
 \bottomrule
 \end{tabular}
 \caption{Key-rate exposures of the \$1M equally-weighted portfolio
-($+50$bps shock at each knot). The parallel-shift effective duration is
+($+50$\,bp shock at each knot). The parallel-shift effective duration is
 7.981 years. KRD and DV01 are central differences; the P\&L column is
 one-sided, so P\&L $\neq -50\times$DV01.}
 \end{table}
@@ -758,17 +792,19 @@ one-sided, so P\&L $\neq -50\times$DV01.}
 
 \textbf{Consistency check.} Both families of shocks sum to a parallel shift,
 so the KRDs should add up to the effective duration. They do: 7.992y (spline)
-and 7.979y (tent), versus 7.981y for a $\pm50$bps parallel shift. Summing the
+and 7.979y (tent), versus 7.981y for a $\pm50$\,bp parallel shift. Summing the
 \emph{one-sided} dollar P\&Ls gives $-\$37{,}704$ versus $-\$38{,}594$ for the
 parallel shock. The gap comes from convexity and cross terms, which are
-largest for the spline because its extrapolated shocks reach about 100bps.
+largest for the spline because its extrapolated shocks reach about 100\,bp.
+The flat-tail family introduced below, whose shocks never exceed 50\,bp, sums to
+$-\$38{,}718$ against $-\$38{,}594$ for the parallel shift.
 This is why we report central-difference KRDs.
 
 \textbf{Robustness: the 15Y/20Y split is an extrapolation effect.} The Q2.1
 spline is pinned by data only up to 20Y; beyond that, the end cubic amplifies
-the effect of a 50bps bump at 20Y to $+103$bps at 26Y, and the effect of a
-50bps bump at 15Y to $-50$bps at 24.5Y. That is what moves duration between
-the two buckets:
+the effect of a 50\,bp bump at 20Y to $+103$\,bp at 26Y, and the effect of a
+50\,bp bump at 15Y to $-50$\,bp at 24.5Y ($-44$\,bp at 26Y). That is what moves
+duration between the two buckets:
 
 \begin{center}
 \small
@@ -777,18 +813,23 @@ the two buckets:
  & 2Y & 5Y & 10Y & 15Y & 20Y & Sum \\
 \midrule
 End cubic (reported)  & 0.367 & 1.541 & 2.210 & 0.810 & 3.064 & 7.992 \\
-Held flat beyond 20Y  & 0.180 & 1.619 & 2.109 & 1.850 & 0.652 & 6.411 \\
+Flat beyond 20Y       & 0.359 & 1.570 & 2.115 & 1.848 & 2.087 & 7.980 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Holding the curve flat would move the split to 1.85y (15Y) and 0.65y (20Y),
-but the five KRDs would then sum to 6.41y instead of the portfolio's 7.98y
-effective duration, because the shocks would no longer sum to a parallel
-shift: the cash flows beyond 20Y, about 1.57y of duration, would carry no
-key-rate exposure at all. We keep the model-consistent extension --- it is
-the only one under which the key-rate decomposition is complete --- and
-present the 15Y/20Y split as model risk rather than as a tradable exposure.
+If the tail is instead held flat beyond 20Y --- the 20Y shock stays at
+$+50$\,bp, the other four are zero there, and the end cubic is kept below 2Y ---
+the split moves to 1.85y (15Y) and 2.09y (20Y), and the five KRDs still sum to
+7.98y (7.980y vs.\ the 7.981y effective duration; the gap is the $\pm50$\,bp
+finite difference): under that convention the five shocks still sum to $+50$\,bp
+at every maturity, so the decomposition is complete. Both conventions are
+complete; they disagree only on where the extrapolated tail is allocated (the
+end cubic gives 20Y 3.06y and 15Y 0.81y, the flat tail 2.09y and 1.85y). We
+report the end-cubic profile because Q4.1 asks for the shock on the curve
+estimated in Q2.1, and present the 15Y/20Y split as model risk rather than as a
+tradable exposure: under the flat-tail convention the 15Y leg of the
+illustrative hedge below flips from $+\$19$k to $-\$153$k.
 
 \textbf{Interpretation.}
 \begin{itemize}[nosep]
@@ -798,24 +839,32 @@ a long-only portfolio.
 2.25y) and follows the cash-flow intuition; the 20Y bucket is the largest
 because it also absorbs every maturity from 20 to 26y.
 \item With the spline re-fit, the ripples of Q4.1 redistribute risk. The 2Y
-KRD falls to 0.37y (vs.\ 0.53y): the 2Y bump pushes 5--10y yields \emph{down}
-by up to 8.4bps, worth $+\$1{,}063$ on the 5--10y cash flows, which more than
-offsets the extra $-\$219$ caused by its larger short-end shock ($+79$bps at
-0.5y vs.\ $+50$bps for the tent). The 15Y/20Y split moves as explained above.
-The total is unchanged, which is the point.
+KRD falls to 0.37y (vs.\ 0.53y): the 2Y bump pushes 6--9y yields \emph{down}
+by up to 8.4\,bp (the shock is zero at the 5Y and 10Y knots), worth $+\$1{,}063$
+on the 5--10y cash flows, which more than offsets the extra $-\$219$ caused by
+its larger short-end shock ($+79$\,bp at 0.5y vs.\ $+50$\,bp for the tent). The
+15Y/20Y split moves as explained above. The total is unchanged, which is the
+point.
 \item \textbf{Practical implication.} The choice of curve model is itself a
 source of hedging risk. A hedge sized on spline KRDs would put far more
 weight on 20Y and far less on 15Y than a hedge sized on tent KRDs, even
-though both imply the same total duration.
+though both imply the same total duration. Under the flat-tail convention the
+profile (1.85/2.09y at 15Y/20Y) sits close to the tent (1.69/2.25y), so most of
+the discrepancy is the end cubic, not the key-rate method.
 \end{itemize}
 
 \textbf{Illustrative KRD hedge (beyond the question).} Neutralising the five
 spline key-rate DV01s with the five bonds maturing exactly at the key dates
-requires short \$93.6k (Aug-2005), short \$199.5k (Aug-2008), short \$211.5k
-(Aug-2013), \emph{long} \$19.4k (Aug-2018) and short \$445.6k (Aug-2023), for
-a hedge market value of $-\$968$k (the funding leg is not modelled). The
-$+50$bps parallel P\&L falls from $-\$38{,}594$ to $+\$57$; the individual
-key-rate residuals are at most \$606 (20Y), from second-order convexity.
+requires face amounts of short \$93.6k (Aug-2005), short \$199.5k (Aug-2008),
+short \$211.5k (Aug-2013), \emph{long} \$19.4k (Aug-2018) and short \$445.6k
+(Aug-2023) --- a net face position of $-\$930.9$k ($-\$930.8$k from the rounded
+legs), corresponding to a hedge market value of $-\$968$k at those bonds' market
+prices (the funding leg is not modelled). The $+50$\,bp parallel P\&L falls from
+$-\$38{,}594$ to $+\$57$; the individual key-rate residuals are at most \$606
+(20Y), from second-order convexity. Under the flat-tail convention all five
+legs are short in face amount (\$79.0k, \$190.7k, \$160.6k, \$153.3k and
+\$306.1k), so the 15Y leg flips from $+\$19.4$k to $-\$153.3$k and the 20Y leg
+drops from $-\$445.6$k to $-\$306.1$k.
 
 \newpage
 %Paolo
@@ -1146,50 +1195,53 @@ differences between mandates are indicative only. Q2.1 tests which of them
 survive proper inference.
 \end{itemize}
 
-%--------------------------------------------------------------------
 \question{Q2.1 --- Limitations, improvements, and how they change Q1}
 
 \subsection*{(a) Limitations of the design}
 \begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
 \item \textbf{Biased baseline (regime effect).} The ``normal'' change is
-estimated on non-event days, which fall mostly in 2015--16 and 2021--24, the
-Fed hiking cycle. The 10Y non-event baseline rises by $+6.5$bp per 30 days,
-while the average 30-day change was $-3.6$bp in 2017--20 and $-5.8$bp in 2025
-(Table~\ref{tab:drift}). Subtracting a rising baseline from falling-rate
-periods mechanically creates a negative ``abnormal'' change: a large part of
-the Q1.1 post-event drift is a regime effect, not a tariff effect.
+estimated on non-event days, which fall mostly in 2015--16 and 2020--24, a
+period dominated by the 2022--23 hiking cycle. The 10Y non-event baseline
+therefore rises by $+6.5$\,bp per 30 days, while the average 30-day change was
+$-3.6$\,bp in 2017--20 and $-5.8$\,bp in 2025 (Table~\ref{tab:drift}).
+Subtracting a rising baseline from falling-rate periods mechanically creates a
+negative ``abnormal'' change. Q1 shows that this explains most of the
+post-event declines (raw vs.\ abnormal changes in Tables~\ref{tab:q11}
+and~\ref{tab:q13}).
 \item \textbf{Overlapping windows.} Events come in bursts (e.g.\ 14 events
-between 2025-02-01 and 2025-04-10), so 30-day windows overlap and contain each
-other's events. Observations are not independent, and the long windows mix
-many news items.
-\item \textbf{No statistical inference.} Averages are reported without
-standard errors; given a daily standard deviation of about 5bp, a few bp over 30 days is
-well within noise.
+between 2025-02-01 and 2025-04-10). The 30-day windows therefore overlap and
+contain each other's events: observations are not independent, and each long
+window mixes many news items.
+\item \textbf{No valid inference.} The assignment's design produces averages
+without a test. The naive standard errors added in Q1 treat overlapping
+windows as independent, so they overstate precision. With 61 horizons and
+several series, some ``large'' numbers are bound to appear by chance.
 \item \textbf{Event-list quality.}
 \begin{itemize}[nosep]
 \item Two entries are silently lost to duplicated dictionary keys (2025-08-06
 and 2025-03-04).
 \item Some entries are not shocks: ``no retaliation'' announcements, a status
-quo, a US court ruling listed as a foreign response.
+quo, and a US court ruling listed as a foreign response.
 \item Escalations and de-escalations (Phase One deal, delays, exemptions) are
-averaged together, so they offset each other.
-\item Major milestones are missing: the 90-day pause (2025-04-09), the US--China
-Geneva agreement (2025-05-12) and the US--EU deal (2025-07-27).
+averaged together, so their effects offset each other.
+\item Major milestones are missing: the 90-day pause (2025-04-09), the
+US--China Geneva agreement (2025-05-12) and the US--EU deal (2025-07-27).
 \item Some descriptions are inaccurate (145\% was the US rate on China).
 \end{itemize}
-\item \textbf{Sample truncation.} The download stops on 2025-08-01: six
+\item \textbf{Sample truncation.} The download stops on 2025-08-01: eight
 August-2025 events are dropped and late-July windows are cut short.
 \item \textbf{Timing.} Several announcements came after the market close
 (``Liberation Day'' on 2025-04-02 was announced after 4pm ET) or on weekends,
-so day 0 is not the reaction day (Figure~\ref{fig:lib}).
-\item \textbf{Confounding news.} Some event days coincide with FOMC decisions;
-Trump actions and foreign responses share the same trading day seven times (eight in the extended sample).
+so day 0 is not always the reaction day (Figure~\ref{fig:lib}).
+\item \textbf{Confounding news.} Some event days coincide with FOMC
+decisions, and Trump actions and foreign responses share the same trading day
+eight times in the notebook list.
 \item \textbf{Measurement.} Level $=$ 10Y duplicates Q1.1. Constant-maturity
-par yields are used rather than zero rates, and daily closes cannot isolate
-an announcement from other news on the same day.
+par yields are used rather than zero rates, and daily closes cannot isolate an
+announcement from other news on the same day.
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \small
 \begin{tabular}{lrrrr}
@@ -1199,17 +1251,19 @@ Period & 2015--16 & 2017--20 (1st term) & 2021--24 & 2025 (2nd term) \\
 Mean 30-day 10Y change (bp) & $+3.3$ & $-3.6$ & $+9.7$ & $-5.8$ \\
 \bottomrule
 \end{tabular}
-\caption{Average 30-day change of the 10Y yield by period: the non-event
-baseline ($+6.5$bp) is dominated by the 2021--24 hiking cycle.}
+\caption{Average 30-day change of the 10Y yield by period. The non-event
+baseline of the assignment ($+6.5$\,bp) is dominated by the 2021--24 hiking
+cycle.}
 \label{tab:drift}
 \end{table}
 
 \subsection*{(b) Improvements implemented}
-All are in \texttt{06\_event\_study.py}, function \texttt{part\_q2}.
+All improvements are in \nolinkurl{06_event_study.py}, function
+\texttt{part\_q2}.
 \begin{enumerate}[leftmargin=1.4em,itemsep=1pt]
 \item \textbf{Cleaned and signed event list.}
 \begin{itemize}[nosep]
-\item Duplicated keys merged; six non-events removed (list in the code).
+\item Duplicated keys merged and six non-events removed (list in the code).
 \item Each event signed as escalation ($+1$) or de-escalation ($-1$).
 \item Three missing de-escalation milestones added.
 \item Result: 72 events, of which 63 escalations and 9 de-escalations.
@@ -1217,124 +1271,178 @@ All are in \texttt{06\_event\_study.py}, function \texttt{part\_q2}.
 \item \textbf{Extended sample} to 2025-10-31, so that every event has a full
 window.
 \item \textbf{Short windows} $[-1,+1]$ and $[0,+5]$ to capture the
-announcement effect. $[-1,+1]$ also covers after-close announcements, since
-the reaction then occurs on day $+1$.
-\item \textbf{Local baseline.} Expected change $=$ average daily change in
-the \emph{same mandate} on clean days (no event within $\pm5$ days), times
-the window length. This is a constant-mean model by regime, instead of a
-2015--2025 average.
+announcement effect. The $[-1,+1]$ window also covers after-close
+announcements, whose reaction occurs on day $+1$.
+\item \textbf{Baseline from the same mandate.} The expected change is the
+average change over windows of the same length that start on ordinary days of
+the same mandate, i.e.\ days with no event within $\pm1$ day (913 days in the
+first term, 127 in the second). Each event is thus compared with a typical
+window of its own rate regime, not with a 2015--2025 average.
 \item \textbf{Placebo inference.} For each group we draw 5{,}000 sets of
-pseudo-event dates (same number per mandate, from clean days of that
-mandate). The two-sided $p$-value is the share of placebo averages at least
-as extreme as the actual one.
+pseudo-event dates from the same pools, keeping the number of events per
+mandate. The two-sided $p$-value is the share of placebo averages at least as
+extreme as the actual one.
+\begin{itemize}[nosep]
+\item A stricter pool (no event within $\pm5$ days) leaves only 56 days in
+2025. These are unusually calm days, so the placebo distribution becomes too
+narrow and the $p$-values too optimistic.
+\item With that pool, 6 results lose significance at 5\% and 5 gain it, but
+none of the conclusions below changes (\nolinkurl{pl_q2_placebo_sensitivity.csv}).
+\end{itemize}
 \item \textbf{De-clustering.} The 30-day window uses only the first event of
 each cluster (no other event in the previous 5 trading days).
-\item \textbf{Robustness.} We exclude events with a same-day foreign response,
-events within $\pm1$ day of an FOMC decision, and replace the 10Y by a PCA
-level (first principal component of daily changes).
+\item \textbf{Robustness.} We exclude events with a same-day foreign response
+and events within $\pm1$ day of an FOMC decision, and we replace the 10Y by a
+PCA level (first principal component of daily changes). For 2025 we also drop
+April, the month of ``Liberation Day'' and of the Treasury basis-trade
+deleveraging (Table~\ref{tab:rob25}).
 \end{enumerate}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \footnotesize
-\setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{lrrrrrrrrrr}
 \toprule
  & \multicolumn{4}{c}{$[-1,+1]$} & \multicolumn{3}{c}{$[0,+5]$} & \multicolumn{2}{c}{$[0,+30]$, cluster heads} & \\
 \cmidrule(lr){2-5}\cmidrule(lr){6-8}\cmidrule(lr){9-10}
 Group & 2Y & 10Y & 30Y & Slope & 10Y & 30Y & Slope & 2Y & 10Y & $n$ \\
 \midrule
-Trump escalations     & $-0.1$ & $+0.1$ & $+1.1$ & $+0.2$ & $+0.1$ & $+0.9$ & $+1.6^{**}$ & $+2.9$ & $+3.0$ & 31/18 \\
-\quad 1st term        & $-2.1$ & $-2.2$ & $-1.7$ & $0.0$  & $-0.7$ & $-0.8$ & $-0.7$ & $+9.0$ & $+7.2$ & 16/12 \\
-\quad 2nd term        & $+2.1$ & $+2.6$ & $+4.1^{**}$ & $+0.5$ & $+0.9^{*}$ & $+2.6^{**}$ & $+4.0^{**}$ & $-9.3$ & $-5.5$ & 15/6 \\
-Foreign escalations   & $+0.8$ & $+2.5^{*}$ & $+2.9^{**}$ & $+1.6^{**}$ & $+3.0^{**}$ & $+3.2^{**}$ & $+1.7^{**}$ & $+1.4$ & $+4.8$ & 32/10 \\
-\quad 1st term        & $+0.4$ & $+0.4$ & $+0.6$ & $0.0$  & $+0.6$ & $-0.7$ & $-1.7$ & $+10.7$ & $+7.7$ & 20/7 \\
-\quad 2nd term        & $+1.6$ & $+5.9^{**}$ & $+6.9^{**}$ & $+4.3^{**}$ & $+7.1^{**}$ & $+9.5^{**}$ & $+7.2^{**}$ & $-20.3^{**}$ & $-2.0$ & 12/3 \\
-De-escalations (all)  & $+5.1^{**}$ & $+4.8^{*}$ & $+4.6^{*}$ & $-0.3$ & $-0.4$ & $+1.4$ & $+2.2^{*}$ & $-26.7^{**}$ & $-24.5^{**}$ & 9/4 \\
+Trump escalations    & $+1.2$ & $+1.5$ & $+2.1$ & $+0.3$ & $+1.8$ & $+2.0$ & $+2.0^{*}$ & $+6.6$ & $+6.1$ & 31/18 \\
+\quad 1st term       & $-2.3$ & $-2.2$ & $-1.5$ & $+0.1$ & $-0.6$ & $-0.5$ & $-0.4$ & $+7.9$ & $+7.2$ & 16/12 \\
+\quad 2nd term       & $+5.1^{**}$ & $+5.5^{**}$ & $+6.0^{**}$ & $+0.4$ & $+4.3$ & $+4.7^{*}$ & $+4.6^{**}$ & $+4.1$ & $+4.1$ & 15/6 \\
+\addlinespace
+Foreign escalations  & $+1.8$ & $+3.5^{**}$ & $+3.7^{**}$ & $+1.7^{*}$ & $+4.3^{**}$ & $+4.1^{**}$ & $+2.1^{*}$ & $+4.6$ & $+7.7$ & 32/10 \\
+\quad 1st term       & $+0.2$ & $+0.4$ & $+0.7$ & $+0.2$ & $+0.6$ & $-0.4$ & $-1.4$ & $+9.5$ & $+7.7$ & 20/7 \\
+\quad 2nd term       & $+4.6^{**}$ & $+8.8^{**}$ & $+8.8^{**}$ & $+4.2^{**}$ & $+10.5^{**}$ & $+11.6^{**}$ & $+7.7^{**}$ & $-6.9$ & $+7.6$ & 12/3 \\
+\addlinespace
+De-escalations (all) & $+7.0^{**}$ & $+6.7^{**}$ & $+5.9^{**}$ & $-0.3$ & $+1.9$ & $+2.9$ & $+2.6$ & $-20.6^{**}$ & $-19.7^{**}$ & 9/4 \\
 \bottomrule
 \end{tabular}
-\caption{Improved design: abnormal change in bp (positive $=$ yields up),
-regime-specific baseline, extended sample, cleaned events. Placebo
-$p$-values: $^{*}p<0.10$, $^{**}p<0.05$. $n$ $=$ events in the short / 30-day
-windows.}
+\caption{Improved design: abnormal change in bp (positive $=$ yields up)
+relative to ordinary windows of the same mandate, extended sample, cleaned
+events. Placebo $p$-values: $^{*}p<0.10$, $^{**}p<0.05$. $n$ $=$ events in
+the short / 30-day windows.}
 \label{tab:improved}
 \end{table}
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=\textwidth]{pl_q2_improved_dotplot.png}
 \caption{Improved estimates (dots) against the 95\% range of the placebo
 distribution (grey bars). Red dots are significant at 5\%.}
 \end{figure}
 
-\begin{figure}[h]
+\begin{table}[!htbp]
+\centering
+\small
+\begin{tabular}{lcrrrr}
+\toprule
+ & & \multicolumn{2}{c}{10Y} & \multicolumn{2}{c}{30Y} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+2025 escalations, window $[-1,+1]$ & $n$ & bp & $p$ & bp & $p$ \\
+\midrule
+Trump actions, all                  & 15 & $+5.5$ & 0.005 & $+6.0$ & 0.002 \\
+\quad excl.\ April 2025             & 13 & $+5.7$ & 0.006 & $+5.7$ & 0.005 \\
+\quad excl.\ same-day foreign response & 12 & $+3.4$ & 0.112 & $+3.7$ & 0.072 \\
+\addlinespace
+Foreign responses, all              & 12 & $+8.8$ & $<0.001$ & $+8.8$ & $<0.001$ \\
+\quad excl.\ April 2025             & 9  & $+6.7$ & 0.005 & $+6.7$ & 0.006 \\
+\quad excl.\ same-day Trump action  & 9  & $+7.1$ & 0.004 & $+6.8$ & 0.005 \\
+\bottomrule
+\end{tabular}
+\caption{Robustness of the 2025 announcement effect (placebo $p$-values). No
+2025 escalation falls within $\pm1$ day of an FOMC decision, so that
+exclusion changes nothing.}
+\label{tab:rob25}
+\end{table}
+
+\begin{figure}[!htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{pl_q2_liberation_day.png}
 \caption{Daily yields around ``Liberation Day''. The announcement came after
-the close on 2 April, so the reaction is on 3 April ($-20$bp 2Y, $-14$bp
-10Y); from 7 to 10 April the long end sold off ($+45$bp on the 30Y between the 4 and 10 April closes) while tariffs were still escalating.}
+the close on 2 April, so the reaction is on 3 April ($-20$\,bp 2Y, $-14$\,bp
+10Y). From 7 to 10 April the long end sold off ($+45$\,bp on the 30Y between
+the 4 and 10 April closes) while tariffs were still escalating.}
 \label{fig:lib}
 \end{figure}
 
 \subsection*{(c) How the improvements change our answers to Q1}
 
-\begin{table}[h]
+\begin{table}[!htbp]
 \centering
 \footnotesize
-\begin{tabular}{p{1.3cm}p{6.3cm}p{6.6cm}}
+\begin{tabular}{p{1.1cm}p{5.4cm}p{7.6cm}}
 \toprule
  & Assignment design (Q1) & Improved design (Q2) \\
 \midrule
-Q1.1 & Yields fall 10--14bp after Trump actions, mostly at the front end:
-flight to quality. & \textbf{Not robust.} No significant announcement effect
-(all $p>0.12$ across the five robustness variants). The 30-day decline
-disappears ($+2.9$bp on the 2Y, n.s.) once the baseline is the same-regime
-drift: it was a rate-cycle effect. \\
+Q1.1 & Abnormal declines of 10--14\,bp after Trump actions, but no
+announcement effect and a raw change close to zero. &
+\textbf{Confirmed: no effect when both mandates are pooled.} Trump escalations
+have no significant announcement effect ($p\ge0.13$; 1 of 20 robustness
+cells below 5\%). The 30-day decline disappears ($+6.6$\,bp on the 2Y, n.s.)
+once each event is compared with its own rate regime. \\
 \addlinespace
-Q1.2 & Bull steepening (level down, slope $+4.5$bp). & Level effect not
-significant. The \textbf{steepening survives} in the short window (slope
-$+1.6$bp$^{**}$ over $[0,+5]$), driven by the second term ($+4.0$bp$^{**}$),
-and comes from the long end \emph{rising}, not from the front end falling. \\
+Q1.2 & Level down, slope up ($+4.5$\,bp): an apparent bull steepening. &
+No level effect when pooled. A steepening over $[0,+5]$ ($+2.0$\,bp, $p=0.07$)
+comes entirely from 2025 ($+4.6$\,bp$^{**}$), and it follows a \emph{rise} in
+yields, not a front-end rally: a bear steepening. \\
 \addlinespace
-Q1.3 & Little reaction after foreign responses. & \textbf{Significant
-rise} in long yields: 10Y $+3.0$bp$^{**}$ and 30Y $+3.2$bp$^{**}$ over
-$[0,+5]$, entirely due to 2025 (10Y $+7.1$, 30Y $+9.5$bp). \\
+Q1.3 & Abnormal change near zero after responses, while raw 10Y and 30Y
+yields rise by 5--7\,bp. & \textbf{Significant rise in long yields}: 10Y
+$+3.5^{**}$ and 30Y $+3.7^{**}$ at the announcement, $+4.1$ to $+4.3^{**}$
+over five days. The effect is entirely due to 2025 (10Y and 30Y
+$+8.8^{**}$, slope $+4.2^{**}$) and survives dropping April. \\
 \addlinespace
-Q1.4 & 2nd term: bigger front-end rally. & The front-end rally is not
-significant at short horizons. The robust difference is at the long end:
-\textbf{first term no reaction, second term yields up and curve steeper}.
-Treasuries did not act as a safe haven in 2025. \\
+Q1.4 & 1st term: no raw reaction. 2nd term: front-end decline and
+steepening. & \textbf{1st term: no effect at any horizon. 2nd term: yields
+rise} by 5--6\,bp across the curve on Trump escalation days and by 9\,bp at
+the long end after retaliation; the curve then steepens. The 30-day
+front-end decline of 2025 is not event-specific: it is the general 2025
+trend. Treasuries did not act as a safe haven. \\
 \addlinespace
-New & --- & \textbf{De-escalations} raise yields ($+5.1$bp$^{**}$ on the 2Y
-over $[-1,+1]$; e.g.\ $+20$bp on 9 April 2025): ``risk-on'', the mirror image
-of the flight-to-quality channel, which averaging both types had hidden. \\
+New & --- & \textbf{De-escalations also raise yields} ($+6$ to $+7$\,bp, with
+an unchanged slope; e.g.\ $+20$\,bp on the 2Y on 9 April 2025). This is a
+``risk-on'' repricing of expected Fed cuts, which pooling escalations with
+de-escalations had hidden. \\
 \bottomrule
 \end{tabular}
 \caption{Conclusions before and after the methodological improvements.}
+\label{tab:before_after}
 \end{table}
 
-\textbf{Overall.} The smooth 60-day patterns of Q1 are mostly macro regime
-plus clustering, not tariff news. Once these are removed, three findings
-remain:
+\textbf{Overall.} The smooth 60-day patterns of Q1 are mostly a rate-regime
+effect plus clustering, not tariff news. Once these are removed, three
+findings remain:
 \begin{enumerate}[nosep]
 \item First-term tariff news had no measurable effect on Treasury yields.
-\item In 2025, escalation days, and above all foreign retaliation, pushed
-\emph{long} yields up and steepened the curve, consistent with a rising term
-premium (inflation, fiscal and foreign-demand concerns) rather than a flight
-to safety.
-\item De-escalations caused a risk-on rise in front-end yields.
+\item In 2025, escalation days, and above all foreign retaliation,
+\emph{raised} yields and steepened the curve. The rise is largest at the long
+end, consistent with a rising term premium (inflation, fiscal and
+foreign-demand concerns) rather than a flight to safety. It is not driven by
+April 2025 alone.
+\item De-escalations raised yields roughly in parallel, as markets priced out
+Fed cuts. The \emph{slope} separates the two channels: escalations steepen
+the curve, de-escalations do not.
 \end{enumerate}
 
 \textbf{Remaining limitations.}
 \begin{itemize}[nosep]
-\item Second-term groups are small (3--15 events) and concentrated in April
-2025, when other forces also hit the long end (deleveraging of Treasury
-basis trades, swap-spread moves), so the 2025 result is suggestive rather
-than conclusive.
-\item A cleaner design would use intraday Treasury futures in 30-minute
-windows around each announcement and zero-coupon rather than par yields.
-\item With the relevant curves, foreign yields could measure the reaction in
-the targeted countries directly.
+\item \textbf{Multiple testing.} Table~\ref{tab:improved} reports 84 tests,
+21 of them significant at 5\%, against about 4 expected by chance. The
+significant cells, however, are concentrated in the 2025 groups, whose events
+fall in the same few months, so they are far from 21 independent findings.
+\item \textbf{Small samples.} The second-term groups have 12--15 events in
+the short windows and only 3--6 in the 30-day windows. The 30-day results,
+including the $-20$\,bp for de-escalations ($n=4$), are anecdotal.
+\item \textbf{Overlaps remain.} Removing same-day foreign responses weakens
+the 2025 Trump effect ($p=0.07$--$0.11$), so part of it may be retaliation
+news released on the same day.
+\item \textbf{Daily data.} A cleaner design would use intraday Treasury
+futures in 30-minute windows around each announcement, and zero-coupon rather
+than par yields.
+\item \textbf{Foreign curves.} With the relevant data, foreign yields could
+measure the reaction in the targeted countries directly.
 \end{itemize}
 
 \end{document}
