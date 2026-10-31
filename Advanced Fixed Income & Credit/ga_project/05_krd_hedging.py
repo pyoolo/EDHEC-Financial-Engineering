@@ -228,9 +228,9 @@ ax.plot(t, d10 * 1e4, color=RED, lw=1.6, label='Spline re-fit (Q2.1 model)', zor
 ax.plot(t, tnt[j10] * 1e4, color=GREY, lw=1.1, ls='--', label='Triangular tent (comparison)', zorder=2)
 ax.plot([k for k in KNOTS if k != 10], np.zeros(len(KNOTS) - 1), 'o', ms=3.4, mfc='white',
         mec=GREY, mew=0.8, ls='none', label='Knots left unchanged', zorder=4)
-ax.text(10.4, 51.5, '+50bps', fontsize=7, color=RED, ha='left', va='center')
-ax.text(25.6, -15.5, '-11.5bps at 26y', fontsize=7, color=RED, ha='right', va='center')
-ax.set_ylabel('Yield change (bps)')
+ax.text(10.4, 51.5, '+50 bp', fontsize=7, color=RED, ha='left', va='center')
+ax.text(25.6, -15.5, '-11.5 bp at 26y', fontsize=7, color=RED, ha='right', va='center')
+ax.set_ylabel('Yield change (bp)')
 ax.set_title('(a) 10Y shock: spline re-fit vs tent')
 ax.set_ylim(-22, 57)
 ax.legend(frameon=False, loc='lower left', handlelength=1.5, borderaxespad=0.2)
@@ -241,7 +241,7 @@ for j, k in enumerate(KNOTS):
     ax.plot(t, spl[j] * 1e4, color=SHOCK_COLORS[j], lw=1.7 if k == 10 else 1.0,
             label=f'{k}Y', zorder=3 if k == 10 else 2)
     ax.axvline(k, color='#999999', ls=':', lw=0.6, zorder=1)
-ax.set_ylabel('Yield change (bps)')
+ax.set_ylabel('Yield change (bp)')
 ax.set_title('(b) The five key-rate shocks')
 ax.set_ylim(-62, 120)
 ax.legend(frameon=False, ncol=5, loc='upper center', handlelength=1.2,
@@ -389,7 +389,8 @@ hedge_cf = (hedge_face / 100.0) @ CF[hedge_idx]
 print("Hedge example -- face amounts of the bonds maturing at 2/5/10/15/20y that zero the 5 key-rate DV01s:")
 for k, i, f in zip(KNOTS, hedge_idx, hedge_face):
     print(f"  {k:>2}Y ({bonds.loc[i,'Maturity'].date()}, {bonds.loc[i,'Coupon']:>5}%): face ${f:>10,.0f}")
-print(f"  Hedge market value ${(hedge_face/100*bonds.loc[hedge_idx,'Price'].values).sum():,.0f} "
+print(f"  Total hedge face amount ${hedge_face.sum():,.0f}; "
+      f"hedge market value ${(hedge_face/100*bonds.loc[hedge_idx,'Price'].values).sum():,.0f} "
       "(funding leg not modelled). Residual P&L (unhedged -> hedged):")
 res = []
 for j, k in enumerate(KNOTS):
