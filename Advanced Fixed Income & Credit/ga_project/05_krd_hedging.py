@@ -4,8 +4,9 @@ Question 4.1 -- Shock the 10-year key rate by 50bps; impact on the Q2.1 spline
                  zero-coupon curve. Plot the difference.
 Question 4.2 -- KRD of a $1M, equally-weighted (across all 52 bonds) portfolio
                  to that 10Y shock.
-Question 4.3 -- KRD to each of the 5 key rates (2,5,10,15,20y) individually,
-                 AND to each of the 52 semi-annual zero yields individually.
+Question 4.3 -- KRD to each of the 52 semi-annual zero yields individually
+                 (the literal reading), AND to each of the 5 key rates
+                 (2,5,10,15,20y) individually (aggregated view).
 Extra       -- Small KRD hedge example (5 hedge bonds, 5 key rates).
 
 Methodology & documented assumptions:
@@ -122,7 +123,7 @@ port_cf = (face / 100.0) @ CF                                   # portfolio cash
 # Alternative reading of "equally invested": equal FACE in each bond ($1M/52 of
 # face, i.e. a market value of $1.19M). Kept only for the robustness table: it
 # weights each bond by its price, overweighting the high-coupon 10.5-20y bonds
-# (prices 130-174) relative to the near-par short bonds (~103).
+# (prices 110-174) relative to the near-par short bonds (~104).
 face_eq = np.full(n_bonds, NAV_TARGET / n_bonds)
 port_cf_eq = (face_eq / 100.0) @ CF
 
@@ -292,7 +293,7 @@ print(rob.round(3).to_string(index=False))
 print(f"  Range of knot-based conventions: {rob['KRD_years'].iloc[:6].min():.2f}-"
       f"{rob['KRD_years'].iloc[:6].max():.2f}y; single-point bump is the zero-yield KRD of Q4.3(a), not the knot KRD.\n")
 
-# ================= Q4.3 (a): the 5 key rates =================
+# ================= Q4.3 (b): the 5 key rates =================
 rows = []
 for j, k in enumerate(KNOTS):
     a, b = krd(spl[j]), krd(tnt[j])
@@ -302,7 +303,7 @@ for j, k in enumerate(KNOTS):
                  'Tent_PnL_$': b['PnL_up'], 'Tent_KRD_years': b['KRD_years'], 'Tent_DV01_$': b['DV01']})
 krd_df = pd.DataFrame(rows)
 krd_df.to_csv(OUT / 'q4_3_krd_by_keyrate.csv', index=False)
-print("Q4.3(a) -- KRD to each key rate (+50bps at each knot):")
+print("Q4.3(b) -- KRD to each key rate (+50bps at each knot):")
 print(krd_df.round(3).to_string(index=False))
 
 eff_dur = -(nav(y_boot + SHOCK) - nav(y_boot - SHOCK)) / (2 * P0 * SHOCK)
@@ -345,7 +346,7 @@ for xi, v in zip(x + w/2, krd_df['Tent_KRD_years']):
 fig2.savefig(OUT / 'q4_3_krd_profile.png', dpi=300)
 print("Saved outputs/q4_3_krd_profile.png\n")
 
-# ================= Q4.3 (b): each of the 52 zero yields individually =================
+# ================= Q4.3 (a): each of the 52 zero yields individually =================
 krd52 = []
 for i in range(n_bonds):
     dy = np.zeros(n_bonds); dy[i] = SHOCK
@@ -354,7 +355,7 @@ for i in range(n_bonds):
 krd52 = pd.DataFrame(krd52)
 krd52.to_csv(OUT / 'q4_3_krd_by_maturity.csv', index=False)
 assert abs(krd52['KRD_years'].sum() - eff_dur) < 0.01
-print(f"Q4.3(b) -- sum of the 52 zero-yield KRDs = {krd52['KRD_years'].sum():.4f}y (= parallel effective duration {eff_dur:.4f}y)")
+print(f"Q4.3(a) -- sum of the 52 zero-yield KRDs = {krd52['KRD_years'].sum():.4f}y (= parallel effective duration {eff_dur:.4f}y)")
 print(f"  largest single-maturity KRD: {krd52['KRD_years'].max():.3f}y at {krd52.loc[krd52['KRD_years'].idxmax(),'Years']:.1f}y")
 
 fig3, ax3 = plt.subplots(figsize=(5.17, 2.8), layout='constrained')

@@ -617,10 +617,10 @@ maturities ($<2$y, $>20$y).}
 construction, zero at the other knots (2, 5, 15, 20y). However, unlike the
 tent, the spline response is \textbf{not local}:
 \begin{itemize}[nosep]
-\item Between 5Y and 15Y it is \emph{wider} than the tent: $+22.1$\,bp at 7y
+\item Over most of $[5,15]$y it is \emph{wider} than the tent: $+22.1$\,bp at 7y
 and $+37.0$\,bp at 12y, versus $+20$ and $+30$\,bp for the linear ramp.
 \item Outside $[5,15]$y the cubic \emph{ripples} with alternating signs:
-about $-3$\,bp between 3 and 4y, $-8.4$\,bp at 17y, and $+8.4$\,bp at 23y.
+about $-3.7$\,bp between 3 and 4y, $-8.4$\,bp at 17y, and $+8.4$\,bp at 23y.
 \item In the \textbf{extrapolated} region beyond 20y the spline continues the
 last cubic polynomial --- the \texttt{CubicSpline} implementation extends the
 end cubic, it does not hold the curve flat --- so the ripple grows to
@@ -663,8 +663,8 @@ in each bond, i.e.\ a face amount of
 $(\text{dollar amount}/\text{price})\times 100$ per bond. The alternative
 reading, an equal \emph{face} amount (\$19{,}230.77 of face in each bond),
 would give a \$1.19m market value and $\text{KRD}_{10Y}=2.31$y: with equal face,
-long bonds trading above par (10.5--20y, prices 130--174) get more market-value
-weight than near-par short bonds (about 103), shifting weight towards the
+long bonds trading above par (10.5--20y, prices 110--174, average 138) get more market-value
+weight than short bonds (average price about 104), shifting weight towards the
 10Y bucket and raising duration. We use equal market value, the standard reading of
 ``equally invested'', and report the alternative in the robustness table.
 
@@ -709,7 +709,8 @@ The sign is as expected: a long bond portfolio loses value when yields rise.
 The \$221.0 is a \emph{central}-difference DV01,
 $\text{DV01}_{10Y}=-\dfrac{P(+h)-P(-h)}{2h}\times10^{-4}=\text{KRD}_{10Y}\times P_0\times10^{-4}$
 with $h=0.005$; the \emph{one-sided} $+50$\,bp
-P\&L implies \$216.26 per bp, so $\Delta P\neq-50\times\text{DV01}$. The
+P\&L implies \$216.26 per bp (a one-sided implied KRD of $2.16$y), so
+$\Delta P\neq-50\times\text{DV01}$. The
 \$4.8 per bp gap is the convexity term, which a 50\,bp move is large enough to
 reveal; we report the central figure because it is the one used to size the
 hedge in Q4.3.
@@ -729,14 +730,14 @@ Spline re-fit, bootstrapped base (\textbf{reported}) & $-\$10{,}813$ & 2.210 \\
 Spline re-fit, spline-priced base & $-\$10{,}954$ & 2.234 \\
 Triangular tent, bootstrapped base & $-\$10{,}123$ & 2.061 \\
 Triangular tent, spline-priced base & $-\$10{,}232$ & 2.078 \\
-Spline re-fit, linear extension outside $[2,20]$y & $-\$12{,}279$ & 2.511 \\
+Spline re-fit, shock linearly extended outside $[2,20]$y & $-\$12{,}279$ & 2.511 \\
 Single-point 10Y bump (10Y zero yield only) & $-\$1{,}169$ & 0.240 \\
 Equal-face portfolio, bootstrapped base & $-\$13{,}445$ & 2.307 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-Every knot-based convention puts the 10Y exposure between $2.0$ and $2.5$
+Every knot-based convention puts the 10Y exposure between $2.0$ and $2.6$
 years ($2.06$--$2.51$y); the spread is methodological, not arithmetic. We report $2.21$y
 because (i) Q4.1 asks for the impact on the curve \emph{estimated in Q2.1},
 which is the re-fitted spline, and (ii) pricing the base off the bootstrap
@@ -759,8 +760,8 @@ reading).} ``All maturities'' is read as applying the same $+50$\,bp shock to
 each semi-annual zero yield (0.5y to 26y) \emph{on its own}, leaving the other
 51 unchanged. This version needs no curve model: only the discount factor of
 that single date moves, so to first order the KRD at date $t$ is
-$t\times\text{PV}(\text{CF}_t)/\text{NAV}$ (i.e.\
-$[t/(1+y_t/2)]\times\text{PV}(\text{CF}_t)/\text{NAV}$ in BEY terms).
+$t\times\text{PV}(\text{CF}_t)/\text{NAV}$, or exactly
+$[t/(1+y_t/2)]\times\text{PV}(\text{CF}_t)/\text{NAV}$ in BEY terms.
 
 \begin{figure}[htbp]
 \centering
@@ -821,8 +822,8 @@ and 7.979y (tent), versus 7.981y for a $\pm50$\,bp parallel shift. Summing the
 \emph{one-sided} dollar P\&Ls gives $-\$37{,}704$ versus $-\$38{,}594$ for the
 parallel shock. The gap comes from convexity and cross terms, which are
 largest for the spline because its extrapolated shocks reach about 100\,bp.
-The flat-tail family introduced below, whose shocks never exceed 50\,bp, sums to
-$-\$38{,}718$ against $-\$38{,}594$ for the parallel shift.
+The flat-tail family introduced below, which caps the $>20$y shock at 50\,bp,
+sums to $-\$38{,}718$ against $-\$38{,}594$ for the parallel shift.
 This is why we report central-difference KRDs.
 
 \textbf{Robustness: the 15Y/20Y split is an extrapolation effect.} The Q2.1
@@ -849,9 +850,10 @@ the split moves to 1.85y (15Y) and 2.09y (20Y), and the five KRDs still sum to
 7.98y (7.980y vs.\ the 7.981y effective duration; the gap is the $\pm50$\,bp
 finite difference): under that convention the five shocks still sum to $+50$\,bp
 at every maturity, so the decomposition is complete. Both conventions are
-complete; they disagree only on where the extrapolated tail is allocated (the
-end cubic gives 20Y 3.06y and 15Y 0.81y, the flat tail 2.09y and 1.85y). We
-report the end-cubic profile because Q4.1 asks for the shock on the curve
+complete; they disagree mainly on where the extrapolated tail is allocated
+(the end cubic gives 20Y 3.06y and 15Y 0.81y, the flat tail 2.09y and 1.85y;
+the 10Y bucket also moves from 2.21y to 2.12y). We report the end-cubic profile
+because Q4.1 asks for the shock on the curve
 estimated in Q2.1, and present the 15Y/20Y split as model risk rather than as a
 tradable exposure: under the flat-tail convention the 15Y leg of the
 illustrative hedge below flips from $+\$19$k to $-\$153$k.
@@ -866,8 +868,9 @@ because it also absorbs every maturity from 20 to 26y.
 \item With the spline re-fit, the ripples of Q4.1 redistribute risk. The 2Y
 KRD falls to 0.37y (vs.\ 0.53y): the 2Y bump pushes 6--9y yields \emph{down}
 by up to 8.4\,bp (the shock is zero at the 5Y and 10Y knots), worth $+\$1{,}063$
-on the 5--10y cash flows, which more than offsets the extra $-\$219$ caused by
-its larger short-end shock ($+79$\,bp at 0.5y vs.\ $+50$\,bp for the tent). The
+on the 5--10y cash flows; the 2--5y bucket adds $+\$205$ and the $>10$y bucket
+$-\$229$, while the extra $-\$219$ comes from the short-end shock ($+79$\,bp at
+0.5y vs.\ $+50$\,bp for the tent), leaving a net $+\$820$ versus the tent. The
 15Y/20Y split moves as explained above. The total is unchanged, which is the
 point.
 \item \textbf{Practical implication.} The choice of curve model is itself a
