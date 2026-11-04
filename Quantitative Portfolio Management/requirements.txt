@@ -1,0 +1,10 @@
+numpy
+pandas>=2.2
+scipy
+matplotlib
+yfinance
+pandas-datareader
+requests
+lxml
+scikit-learn
+jupyter
