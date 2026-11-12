@@ -1,0 +1,6 @@
+financepy>=1.1
+numpy
+pandas
+scipy
+matplotlib
+jinja2
