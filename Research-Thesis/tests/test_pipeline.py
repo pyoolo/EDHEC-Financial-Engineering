@@ -35,6 +35,14 @@ def _cal(code):
     ("GC", "2020-12", "2020-12-29", "2020-11-30"),
     # Corn Dec-2020: business day before the 15th; first notice 30 Nov
     ("C", "2020-12", "2020-12-14", "2020-11-30"),
+    # 10-year note Dec-2020: 7th business day before the last one; notice 30 Nov
+    # (22 Dec here because the test calendar has no holidays; CBOT: 21 Dec)
+    ("TY", "2020-12", "2020-12-22", "2020-11-30"),
+    # 2-year note Dec-2020: last business day of the month
+    ("TU", "2020-12", "2020-12-31", "2020-11-30"),
+    # Bund: two exchange days before delivery on the 10th (Thu 10 Dec 2020; Tue 10 Mar 2020)
+    ("RX", "2020-12", "2020-12-08", "2020-12-08"),
+    ("RX", "2020-03", "2020-03-06", "2020-03-06"),
 ])
 def test_contract_calendar_rules(code, delivery, last_trade, roll_ref):
     row = _cal(code).loc[pd.Period(delivery, "M")]
@@ -48,7 +56,10 @@ def test_contract_cycles():
 
 
 @pytest.mark.parametrize("ticker, code", [("CL1 COMB Comdty", "CL"), ("C 1 Comdty", "C"),
-                                          ("GC1 Comdty", "GC"), ("hg1 comdty", "HG")])
+                                          ("GC1 Comdty", "GC"), ("hg1 comdty", "HG"),
+                                          ("RX1 Comdty", "RX"), ("US1 Comdty", "US"),
+                                          ("HYG US EQUITY", "HYG"), ("LQD US Equity", "LQD"),
+                                          ("VIXIG Index", "CDXIG"), ("MOVE Index", None)])
 def test_detect_code(ticker, code):
     assert detect_code(ticker) == code
 
@@ -115,3 +126,63 @@ def test_calendar_file_french_excel_csv(tmp_path):
     cal = calendar_from_file(f, DAYS)
     assert list(cal["last_trade"]) == [pd.Timestamp("2020-12-29"), pd.Timestamp("2021-02-24")]
     assert list(cal["roll_ref"]) == [pd.Timestamp("2020-11-30"), pd.Timestamp("2021-01-29")]
+
+
+def test_stale_rows_below_a_block_are_ignored(tmp_path):
+    """Rows left over from an older formula (dates jump back) are dropped."""
+    from openpyxl import load_workbook
+    path = tmp_path / "stale.xlsx"
+    write_bloomberg_layout(simulate("S", start="2015-01-05", end="2015-12-31", seed=2), path, "S")
+    wb = load_workbook(path)
+    ws = wb.active
+    last = ws.max_row
+    for k, d in enumerate(pd.bdate_range("2015-06-01", periods=10), start=1):
+        ws.cell(last + k, 12, d.to_pydatetime())
+        for j in (13, 14, 15):
+            ws.cell(last + k, j, 99.0)
+    wb.save(path)
+    daily = load_daily(path)
+    assert daily.index.is_unique
+    assert daily["iv30"].max() < 99
+
+
+def test_smile_variance_flat_and_skewed():
+    from implied_variance import smile_variance
+    m = [0.9, 1.0, 1.1]
+    flat = np.sqrt(smile_variance(m, [[0.35, 0.35, 0.35]]))[0]
+    assert abs(flat - 0.35) < 1e-3                      # flat smile = ATM
+    skew = np.sqrt(smile_variance(m, [[0.40, 0.35, 0.33]]))[0]
+    assert skew > 0.35                                   # skew raises the strike
+
+
+def test_excel_number_dates_and_duplicate_f2(tmp_path):
+    """Dates stored as Excel day numbers are read; a copied F1 in place of F2
+    is reported."""
+    from openpyxl import load_workbook
+    from load_data import check_daily
+    path = tmp_path / "w.xlsx"
+    write_bloomberg_layout(simulate("W", start="2015-01-05", end="2016-12-30", seed=3), path, "W")
+    wb = load_workbook(path)
+    ws = wb.active
+    for r in range(3, ws.max_row + 1):
+        d = ws.cell(r, 12).value
+        ws.cell(r, 12, (d - pd.Timestamp("1899-12-30").to_pydatetime()).days)   # as number
+        ws.cell(r, 10, ws.cell(r, 2).value)                                      # F2 := F1
+    wb.save(path)
+    daily = load_daily(path)
+    assert daily["iv30"].notna().mean() > 0.95
+    assert any("identical" in m for m in check_daily(daily, "W"))
+
+
+def test_cdx_roll_days_and_bp_returns():
+    from commodities import spot_excluded_days
+    from rolls import spot_returns
+    days = pd.bdate_range("2020-03-02", "2020-09-30")
+    excl = spot_excluded_days("CDXIG", days)
+    assert list(excl) == [pd.Timestamp("2020-03-20"), pd.Timestamp("2020-09-21")]
+    spread = pd.Series(50.0 + np.arange(len(days)), index=days)   # +1 bp a day
+    spread.loc["2020-03-20":] += 10                               # jump on the roll day
+    df = pd.DataFrame({"f1": spread, "f2": np.nan})
+    r = spot_returns(df, "CDXIG")
+    assert pd.Timestamp("2020-03-20") not in r.index
+    assert np.allclose(r["ret"], 0.01)                            # 1 bp = 0.01

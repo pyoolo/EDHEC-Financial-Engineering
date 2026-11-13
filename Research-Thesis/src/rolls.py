@@ -9,6 +9,7 @@ of last trading day and first notice day).
 import numpy as np
 import pandas as pd
 
+from commodities import SPOT_SPECS, spot_excluded_days
 from config import ROLL_DAYS_BEFORE_EXPIRY
 
 
@@ -64,3 +65,18 @@ def front_returns(df, calendar, roll_days=ROLL_DAYS_BEFORE_EXPIRY):
     out = pd.DataFrame({"ret": r, "held_f2": held_f2, "generic_roll": generic_rolled},
                        index=dates)
     return out.iloc[1:]
+
+
+def spot_returns(df, code):
+    """Daily returns of a continuous series: log price returns, or spread
+    changes in bp/100 for a credit index quoted in bp (so that realised
+    volatility is in bp and comparable with a bp implied vol). Days on which
+    the generic index switches series are dropped."""
+    if SPOT_SPECS[code]["units"] == "bp":
+        r = df["f1"].diff() / 100
+    else:
+        r = np.log(df["f1"]).diff()
+    excl = spot_excluded_days(code, df.index)
+    out = pd.DataFrame({"ret": r, "held_f2": False, "generic_roll": df.index.isin(excl)},
+                       index=df.index)
+    return out[~out["generic_roll"]].iloc[1:].dropna(subset=["ret"])

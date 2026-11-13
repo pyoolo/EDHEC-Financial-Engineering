@@ -27,12 +27,12 @@ def default_calendar_file(code):
     return RAW_DIR / f"{code}_calendar.csv"
 
 
-def processed_dir(code):
-    return ROOT / "data" / "processed" / code
+def processed_dir(code, strike="smile"):
+    return ROOT / "data" / "processed" / strike / code
 
 
-def results_dir(code):
-    return ROOT / "results" / code
+def results_dir(code, strike="smile"):
+    return ROOT / "results" / strike / code
 
 
 # --- Futures roll -----------------------------------------------------------
@@ -45,6 +45,10 @@ ROLL_DAYS_BEFORE_EXPIRY = 5
 # --- Variance-swap proxy -----------------------------------------------------
 ANNUALISATION = 252           # trading days per year
 IV_FIELD = "iv30"             # 30-day constant-maturity ATM implied vol
+# Variance-swap strike: "smile" = implied variance integrated over the 30-day
+# smile points in the data (falls back to ATM if there are none); "atm" =
+# ATM implied variance. See implied_variance.py.
+STRIKE = "smile"
 
 # --- Timing rules ------------------------------------------------------------
 MIN_HISTORY_MONTHS = 12       # expanding-window rules switch on after this
@@ -65,9 +69,11 @@ NEWEY_WEST_LAGS = 3
 SPLIT_DATE = "2016-12-31"     # in-sample / out-of-sample split
 RANDOM_SEED = 42
 
-# Stress episodes reported for every commodity (months of realised returns)
+# Stress episodes reported for every instrument (months of realised returns)
 CRISES = {
     "GFC 2008": ("2008-09", "2008-12"),
+    "Euro debt crisis 2011": ("2011-08", "2011-11"),
+    "Taper tantrum 2013": ("2013-05", "2013-06"),
     "Commodity crash 2014-16": ("2014-07", "2016-02"),
     "COVID 2020": ("2020-02", "2020-04"),
     "Ukraine 2022": ("2022-02", "2022-06"),

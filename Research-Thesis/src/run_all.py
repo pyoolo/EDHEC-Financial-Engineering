@@ -3,7 +3,8 @@
 Usage (from the project root):
     python src/run_all.py --commodity CL               # reads data/raw/CL.xlsx
     python src/run_all.py --commodity CL GC HG C       # several, one after the other
-    python src/run_all.py --data PATH.xlsx             # commodity read from cell A1
+    python src/run_all.py --data PATH.xlsx             # every sheet; commodity read from cell A1
+    python src/run_all.py --data PATH.xlsx --commodity GC C   # only these sheets
     python src/run_all.py --list                       # supported commodities
 
 Outputs for commodity CODE go to data/processed/CODE/ and results/CODE/
@@ -20,12 +21,11 @@ import pandas as pd
 import config as C
 from evaluation import (bootstrap_sharpe_diff, metrics, newey_west_mean,
                         sharpe, spanning, vol_match)
-from load_data import load_daily
 from panel import build_panel
 from plots import fig_cumulative, fig_premium, fig_weights
-from commodities import SPECS, calendar_from_file, contract_calendar
-from load_data import detect_commodity
-from rolls import check_calendar, front_returns
+from commodities import INSTRUMENTS, calendar_from_file, contract_calendar, is_spot, uses_smile
+from load_data import check_daily, detect_commodity, list_sheets, load_instrument
+from rolls import check_calendar, front_returns, spot_returns
 from strategies import RULE_LABELS, RULE_SHORT, managed_returns, rule_weights
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -54,9 +54,14 @@ def latex_table(df, path, fmt="{:.2f}", index_name=""):
     path.write_text(text)
 
 
-def run_pipeline(daily, calendar, roll_days=C.ROLL_DAYS_BEFORE_EXPIRY, **rule_kw):
-    front = front_returns(daily, calendar, roll_days=roll_days)
-    panel = build_panel(daily, front)
+def run_pipeline(daily, calendar, roll_days=C.ROLL_DAYS_BEFORE_EXPIRY, strike=C.STRIKE,
+                 code=None, **rule_kw):
+    """calendar=None: continuous series (ETF, credit index), no futures roll."""
+    if calendar is None:
+        front = spot_returns(daily, code)
+    else:
+        front = front_returns(daily, calendar, roll_days=roll_days)
+    panel = build_panel(daily, front, strike=strike)
     w = rule_weights(panel, **rule_kw)
     return daily, calendar, front, panel, w
 
@@ -65,63 +70,105 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--commodity", nargs="+", metavar="CODE",
                     help="commodity codes, e.g. CL GC HG C (default: read from the data file)")
-    ap.add_argument("--data", help="Bloomberg Excel export (only with one commodity; "
-                                   f"default ${C.DATA_ENV_VAR} or data/raw/CODE.xlsx)")
+    ap.add_argument("--data", help="Bloomberg Excel export; one commodity per sheet "
+                                   f"(default ${C.DATA_ENV_VAR} or data/raw/CODE.xlsx)")
     ap.add_argument("--calendar", help="optional contract calendar CSV from Bloomberg "
                                        "(default data/raw/CODE_calendar.csv if it exists)")
+    ap.add_argument("--strike", choices=["smile", "atm"], default=C.STRIKE,
+                    help="variance-swap strike: implied variance from the 30-day smile "
+                         "(default) or ATM implied variance")
     ap.add_argument("--list", action="store_true", help="list supported commodities and exit")
     args = ap.parse_args(argv)
 
     if args.list:
-        for code, s in SPECS.items():
-            print(f"{code:<3} {s['name']:<24} {s['exchange']:<6} months {s['cycle']}")
+        for code, s in INSTRUMENTS.items():
+            what = f"months {s['cycle']}" if "cycle" in s else f"continuous ({s['units']})"
+            strike = "smile" if s.get("smile", True) else "ATM"
+            print(f"{code:<5} {s['name']:<32} {s['exchange']:<9} {what:<20} strike {strike}")
         return
 
     codes = [c.upper() for c in args.commodity] if args.commodity else None
-    if codes and len(codes) > 1 and (args.data or args.calendar):
-        ap.error("--data/--calendar can only be used with a single commodity")
-    if not codes:
-        given = args.data or os.environ.get(C.DATA_ENV_VAR)
-        if not given:
-            ap.error("say which commodity to run, e.g. --commodity CL "
-                     "(reads data/raw/CL.xlsx), or pass --data PATH")
-        path = C.resolve_data_path("?", given)
-        code = detect_commodity(path)
-        if code not in SPECS:
-            ap.error(f"cannot tell the commodity from cell A1 of {path}; use --commodity")
-        codes = [code]
+    for code in codes or []:
+        if code not in INSTRUMENTS:
+            ap.error(f"unknown instrument {code}; supported: {', '.join(INSTRUMENTS)}")
 
-    for code in codes:
-        if code not in SPECS:
-            ap.error(f"unknown commodity {code}; supported: {', '.join(SPECS)}")
-        data_path = C.resolve_data_path(code, args.data, use_env=len(codes) == 1)
-        analyse(code, data_path, args.calendar)
+    jobs = []                                   # (code, file, sheet)
+    given = args.data or (os.environ.get(C.DATA_ENV_VAR) if not codes or len(codes) == 1 else None)
+    if given:
+        # one workbook, one commodity per sheet (detected from cell A1)
+        path = C.resolve_data_path(codes[0] if codes and len(codes) == 1 else "?", given)
+        sheets = [(name, code) for name, code in list_sheets(path) if code in INSTRUMENTS]
+        if codes:
+            sheets = [(n, c) for n, c in sheets if c in codes]
+            missing = set(codes) - {c for _, c in sheets}
+            if missing:
+                ap.error(f"{path} has no sheet for {', '.join(sorted(missing))} (cell A1 ticker)")
+        if not sheets:
+            ap.error(f"no sheet of {path} has a recognised ticker in cell A1; use --commodity")
+        # skip unusable sheets; if two sheets hold the same commodity keep the larger
+        usable = {}
+        for name, code in sheets:
+            daily = load_instrument(path, name, code)
+            issues = check_daily(daily, f"[{code}] sheet {name}")
+            if issues:
+                print("SKIPPED " + "; ".join(issues))
+                continue
+            if code in usable and len(usable[code][1]) >= len(daily):
+                print(f"[{code}] sheet {name} ignored: sheet {usable[code][0]} has more data")
+                continue
+            usable[code] = (name, daily)
+        if not usable:
+            ap.error(f"no usable sheet in {path}")
+        jobs = [(code, path, name) for code, (name, _) in usable.items()]
+    elif codes:
+        for code in codes:
+            path = C.resolve_data_path(code, None, use_env=False)
+            match = [n for n, c in list_sheets(path) if c == code]
+            jobs.append((code, path, match[0] if match else 0))
+    else:
+        ap.error("say which commodity to run, e.g. --commodity CL "
+                 "(reads data/raw/CL.xlsx), or pass --data PATH")
+
+    if args.calendar and len(jobs) > 1:
+        ap.error("--calendar can only be used with a single commodity")
+    for code, path, sheet in jobs:
+        analyse(code, path, args.calendar, sheet=sheet, strike=args.strike)
 
 
-def analyse(code, data_path, calendar_path=None):
-    spec = SPECS[code]
-    print(f"[{code}] {spec['name']}: reading {data_path}")
-    raw_daily = load_daily(data_path)
-    found = detect_commodity(data_path)
+def analyse(code, data_path, calendar_path=None, sheet=0, strike=C.STRIKE):
+    spec = INSTRUMENTS[code]
+    where = f"{data_path}" + (f" [sheet {sheet}]" if sheet != 0 else "")
+    print(f"[{code}] {spec['name']}: reading {where}")
+    raw_daily = load_instrument(data_path, sheet, code)
+    found = detect_commodity(data_path, sheet)
     if found and found != code:
         print(f"[{code}] warning: cell A1 of the file looks like {found}, not {code}")
 
     cal_path = calendar_path or C.default_calendar_file(code)
-    if calendar_path or cal_path.exists():
+    if is_spot(code):
+        calendar = None
+        print(f"[{code}] continuous series: no futures roll")
+    elif calendar_path or cal_path.exists():
         calendar = calendar_from_file(cal_path, raw_daily.index)
         print(f"[{code}] contract calendar from {cal_path}")
     else:
         calendar = contract_calendar(code, raw_daily.index)
         print(f"[{code}] contract calendar from {spec['exchange']} rules")
 
-    out = C.results_dir(code)
-    T, F, P = out / "tables", out / "figures", C.processed_dir(code)
+    out = C.results_dir(code, strike)
+    T, F, P = out / "tables", out / "figures", C.processed_dir(code, strike)
     for d in [T, F, P]:
         d.mkdir(parents=True, exist_ok=True)
     macros = {}
 
-    daily, cal_used, front, p, w = run_pipeline(raw_daily, calendar)
-    exp = cal_used["last_trade"]
+    # results are filed under the strike requested; instruments whose smile
+    # points are too far out of the money (bond futures, ETFs) always use ATM
+    strike_req, strike = strike, (strike if uses_smile(code) else "atm")
+    if strike != strike_req:
+        print(f"[{code}] strike = ATM implied variance (smile points too far from the money)")
+    daily, cal_used, front, p, w = run_pipeline(raw_daily, calendar, strike=strike, code=code)
+    if strike == "smile" and p["iv_smile"].isna().all():
+        print(f"[{code}] no smile points in the data: strike = ATM implied variance")
     gross = managed_returns(p, w)
     scaled = gross.apply(vol_match)
     labels = [RULE_LABELS[c] for c in gross.columns]
@@ -132,18 +179,10 @@ def analyse(code, data_path, calendar_path=None):
     gross.to_csv(P / "returns_gross_per_vega.csv")
     scaled.to_csv(P / "returns_volmatched.csv")
 
-    # ---- Table A1: calendar validation
-    cal = check_calendar(daily, exp).set_index("offset_days")
-    latex_table(cal.rename(columns={"median_abs_spread_change": "Median $|\\Delta \\ln(F_1/F_2)|$",
-                                    "ratio_to_all_days": "Ratio to all days"}),
-                T / "tabA1_calendar.tex", fmt="{:.4f}", index_name="Offset (trading days)")
-    macros["RollSpikeRatio"] = f"{cal.loc[1, 'ratio_to_all_days']:.1f}"
-    cal.to_csv(T / "tabA1_calendar.csv")
-    peak = cal["ratio_to_all_days"].idxmax()
-    if peak != 1:
-        print(f"[{code}] WARNING: F1-F2 spread jumps peak at offset {peak:+d}, not +1. "
-              "The contract calendar may not match the Bloomberg generic; "
-              f"check the cycle in commodities.py or provide data/raw/{code}_calendar.csv")
+    # ---- Table A1: calendar validation (futures only)
+    if calendar is not None:
+        validate_calendar(code, daily, cal_used["last_trade"], T, macros)
+
 
     # ---- Table 1: the premium
     rows = {}
@@ -263,9 +302,11 @@ def analyse(code, data_path, calendar_path=None):
         "36-month burn-in": {"min_hist": 36},
         "90th percentile thresholds": {"pct": 0.90},
     }
+    if calendar is None:                        # no roll to move
+        variants = {k: v for k, v in variants.items() if "roll_days" not in v}
     rows = {}
     for name, kw in variants.items():
-        _, _, _, pv, wv = run_pipeline(raw_daily, calendar, **kw)
+        _, _, _, pv, wv = run_pipeline(raw_daily, calendar, strike=strike, code=code, **kw)
         rows[name] = managed_returns(pv, wv).apply(sharpe)
     # weight 0 instead of 0.5 for the "reduce" rules
     wz = w.replace(C.REDUCED_WEIGHT, 0.0)
@@ -309,6 +350,19 @@ def analyse(code, data_path, calendar_path=None):
     print(f"[{code}] done -> {out}")
     print(t2.round(2).to_string())
 
+
+def validate_calendar(code, daily, exp, T, macros):
+    cal = check_calendar(daily, exp).set_index("offset_days")
+    latex_table(cal.rename(columns={"median_abs_spread_change": "Median $|\\Delta \\ln(F_1/F_2)|$",
+                                    "ratio_to_all_days": "Ratio to all days"}),
+                T / "tabA1_calendar.tex", fmt="{:.4f}", index_name="Offset (trading days)")
+    macros["RollSpikeRatio"] = f"{cal.loc[1, 'ratio_to_all_days']:.1f}"
+    cal.to_csv(T / "tabA1_calendar.csv")
+    peak = cal["ratio_to_all_days"].idxmax()
+    if peak != 1:
+        print(f"[{code}] WARNING: F1-F2 spread jumps peak at offset {peak:+d}, not +1. "
+              "The contract calendar may not match the Bloomberg generic; "
+              f"check the cycle in commodities.py or provide data/raw/{code}_calendar.csv")
 
 def C_target_scale(r_ins, target=0.10):
     """Scale that gives `target` annual vol in the in-sample period."""
