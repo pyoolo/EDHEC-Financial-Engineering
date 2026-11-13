@@ -1,0 +1,277 @@
+% =====================================================================
+%  Harvesting the Commodity Volatility Premium -- first draft (crude oil)
+%  Compile from this folder:  latexmk -pdf main.tex
+%  Run first:  python src/run_all.py --commodity CL
+%  Numbers, tables and figures are read from ../results/CL/ (see \cmdty).
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}  % Times; any standard TeX distribution has it
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{setspace}
+\usepackage[authoryear,round]{natbib}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+
+% Commodity whose results this draft reads (folder results/CODE/)
+\newcommand{\cmdty}{CL}
+\graphicspath{{../results/\cmdty/figures/}}
+\newcommand{\tabdir}{../results/\cmdty/tables}
+\input{../results/\cmdty/numbers.tex}
+
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\onehalfspacing   % final thesis: \doublespacing
+
+\title{Harvesting the Commodity Volatility Premium:\\
+Does Volatility Timing Survive Supply Shocks?\\[0.4em]
+\large First draft: crude oil}
+\author{Paolo Mastrogiacomo\\EDHEC Business School\\Supervisor: Prof.\ Enrique Schroth}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent
+Selling volatility earns a premium on average but loses heavily in crises. This draft tests whether simple, real-time timing rules can keep the premium while cutting the tail, using WTI crude oil futures and options from \SampleStart{} to \SampleEnd{} (\NMonths{} months). Measured against 30-day at-the-money implied volatility, the oil volatility premium is small and statistically insignificant (\VolPremium{} volatility points, $t=\VolPremiumT$), although it is positive in \ShareVolPos\% of months. A short variance-swap position therefore loses money on average, with a skewness of \UnmSkew{} and a worst month of $-\UnmWorst\%$ at 10\% annual volatility. Five of seven timing rules raise the Sharpe ratio, and rules based on implied volatility roughly halve out-of-sample drawdowns and tail losses, but no improvement in the Sharpe ratio is statistically significant. The results are sensitive to the variance strike: the unmanaged strategy breaks even if the fair strike exceeds at-the-money volatility by \BreakEvenStrike{} points, and the gains from timing grow with the strike. The next step is to replace the at-the-money proxy with the model-free OVX index and to extend the test to gold, copper and corn.
+\end{abstract}
+
+\section{Introduction}
+
+Option-implied variance has historically exceeded the variance that is subsequently realised, so investors who sell variance earn a premium \citep{carrwu2009,bollerslev2009}. The return profile is famously asymmetric: small, frequent gains and rare, very large losses, the ``nickels in front of a steamroller'' of \citet{duarte2007}. Whether investors can keep the nickels and step away from the steamroller is the question of this thesis.
+
+The equity literature offers a candidate answer. \citet{moreiramuir2017} show that scaling exposure by the inverse of recent variance improves the Sharpe ratio of equity factors, although \citet{cederburg2020} find that much of the gain disappears out of sample. \citet{yang2024} applies the idea to volatility assets themselves and finds that cutting short-volatility exposure after volatility rises improves risk-adjusted returns on S\&P~500 variance swaps, VIX futures and straddles. Volatility premia also exist across asset classes \citep{fallon2015,khalfallah2025}, and are documented specifically in energy markets \citep{trolle2010,prokopczuk2017}. To my knowledge, however, no study has tested whether \emph{managed} short-volatility strategies work in commodities.
+
+Commodities are a demanding out-of-sample test for equity-style timing. Volatility is driven by supply shocks, inventories and weather rather than by one common factor; oil volatility can rise with prices (inverse leverage); and the sample contains some of the most violent volatility events in any market, including the negative WTI settlement of April 2020. This draft studies crude oil, the most liquid commodity option market. The final thesis will apply the identical design to one commodity per sector: gold, copper and corn.
+
+The draft has three findings. First, measured with at-the-money (ATM) implied volatility as the strike, the oil volatility premium is economically small and statistically insignificant over 2007--2026, and the short variance position has a negative mean return because of a handful of extreme months, above all March and April 2020. Second, timing rules improve the Sharpe ratio modestly, and implied-volatility rules cut drawdowns and tail losses by about half out of sample, but none of the improvements is statistically significant. Third, the conclusions depend on the variance strike, which ATM volatility understates; a model-free implied-variance measure is the most important improvement for the next draft.
+
+\section{Data}
+
+\paragraph{Sources.} All data are daily Bloomberg settlement prices from January 2007 to October 2026. The futures data are the first and second generic NYMEX WTI contracts (\texttt{CL1 COMB Comdty}, \texttt{CL2 Comdty}). Implied volatility is Bloomberg's 30-day constant-maturity at-the-money volatility on the front contract (\texttt{30DAY\_IMPVOL\_100.0\%MNY\_DF}), together with the at-the-money volatility of the first and second listed option expiries, which I use for the term-structure rule. Isolated missing implied-volatility quotes (59 of about 4{,}980 days) are filled with the previous value for at most three days.
+
+\paragraph{Contract calendar and roll.} Generic futures series jump when they switch contract, and these jumps are not volatility. I reconstruct the last trading day of each contract from the NYMEX rule (trading ends three business days before the 25th calendar day of the month preceding delivery, or four if the 25th is not a business day), using the trading days in the data as the business-day calendar. Table~\ref{tab:calendar} in the Appendix validates the reconstruction: the absolute daily change in the CL1--CL2 spread peaks on the day after each reconstructed last trading day, where it is \RollSpikeRatio{} times its median on ordinary days.
+
+The position always holds a single contract. It holds the front contract and switches to the second contract five trading days before the front contract's last trading day; each daily log return is computed on the contract held the previous day. This rule avoids the illiquid final days of each contract, including the negative settlement of the May 2020 contract on 20 April 2020, which the position never holds.
+
+\paragraph{Monthly panel.} Decisions are taken at the last trading day of each month. At decision date $t$, the investor observes implied volatility $\sigma_{IV,t}$, the futures curve and realised volatility over the past month, and sells one month of variance. The outcome is annualised realised variance over the following month,
+\begin{equation}
+\sigma^2_{RV,t\to t+1} = \frac{252}{n}\sum_{i=1}^{n} r_i^2 ,
+\end{equation}
+where $r_i$ are the $n$ daily log returns between $t$ and the next decision date. The final sample has \NMonths{} monthly observations, from \SampleStart{} to \SampleEnd.
+
+\section{Methodology}
+
+\subsection{The short variance-swap proxy}
+
+A variance swap pays the difference between realised variance and a strike fixed at inception. The seller with vega notional $N$ earns
+\begin{equation}
+\text{P\&L}_{t+1} = \frac{N}{2\,\sigma_{IV,t}}\left(\sigma^2_{IV,t} - \sigma^2_{RV,t\to t+1}\right),
+\label{eq:pnl}
+\end{equation}
+so that a difference of one volatility point between implied and realised volatility is worth roughly 1\% of $N$ \citep{demeterfi1999}. I set $N$ equal to capital and use (\ref{eq:pnl}) as the monthly return of the unmanaged strategy. The position is an unfunded swap, so the return is already an excess return.
+
+Using ATM implied volatility as the strike is a simplification. The fair variance-swap strike equals the model-free implied variance, which also prices out-of-the-money options and typically lies above ATM volatility when the smile is curved \citep{demeterfi1999,carrwu2009}. The proxy is therefore likely to \emph{understate} the premium; Section~\ref{sec:robust} quantifies how much this matters.
+
+\subsection{Timing rules}
+
+Each rule maps information available at $t$ into a weight $w_t$, and the managed return is $w_t$ times the unmanaged return. Rules that need a history use an expanding window of past decision dates only, and keep $w_t=1$ until twelve months of history exist (a 36-month burn-in is a robustness check). Table~\ref{tab:rules} lists the rules.
+
+\begin{table}[htbp]
+\centering
+\caption{Timing rules}
+\label{tab:rules}
+\small
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lll}
+\toprule
+Rule & Signal at decision date $t$ & Weight $w_t$ \\
+\midrule
+Volatility scaling (VS) & Past-month realised variance $\sigma^2_{RV,t-1\to t}$ & $\min\left(2,\ \text{median}_{\le t}(\sigma^2_{RV})/\sigma^2_{RV,t-1\to t}\right)$ \\
+Realised-vol threshold (RVT) & Past-month realised vol above its 80th percentile & 0.5 \\
+Implied-vol jump (IVJ) & Implied vol up more than 20\% over 5 trading days & 0 \\
+Implied-vol trend (IVT) & Implied vol above its 63-day moving average & 0.5 \\
+Term structure (TS) & Ratio of 1st- to 2nd-expiry ATM vol above its 80th percentile & 0.5 \\
+Premium filter (PF) & Implied vol below past-month realised vol & 0 \\
+Backwardation (BW) & $\ln(F_1/F_2)$ above its 80th percentile & 0.5 \\
+\bottomrule
+\end{tabular}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize Percentiles and the median are computed on an expanding window of past decision dates. When a condition is not met, $w_t=1$. The volatility-scaling rule follows \citet{moreiramuir2017}, with the constant set in real time. Front-month implied vol exceeds second-month implied vol in about half of all months, so the term-structure rule acts only on unusually steep inversions. Backwardation is the oil-specific rule: a steep backwardation signals physical scarcity.}
+\end{table}
+
+\subsection{Evaluation}
+
+Following \citet{moreiramuir2017}, every strategy is scaled to the same 10\% annualised volatility over the full sample, so that a managed strategy cannot look better simply by taking less risk. I report the annualised mean, Sharpe and Sortino ratios, skewness, maximum drawdown of cumulative P\&L, and monthly 95\% and 99\% conditional value-at-risk (CVaR). Spanning regressions of each managed strategy on the unmanaged one,
+\begin{equation}
+r^{\text{managed}}_{t+1} = \alpha + \beta\, r^{\text{unmanaged}}_{t+1} + \varepsilon_{t+1},
+\end{equation}
+test whether timing adds value that the unmanaged strategy cannot replicate, using \citet{neweywest1987} standard errors with three lags. The difference in Sharpe ratios is tested with a circular block bootstrap \citep{politis1992} with six-month blocks and 5{,}000 draws, in the spirit of \citet{ledoitwolf2008}. Because full-sample volatility matching uses future information, Section~\ref{sec:robust} also scales each strategy with its 2007--2016 volatility and evaluates it on 2017--2026.
+
+\section{Results}
+
+\subsection{The oil volatility premium}
+
+Figure~\ref{fig:premium} compares implied volatility at the start of each month with the volatility realised over the month. The two series track each other closely, and implied volatility usually sits slightly above realised volatility. The exceptions are concentrated in the shaded crisis episodes, where realised volatility overshoots implied volatility by tens of points.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{fig1_premium.pdf}
+\caption{Implied and realised volatility of WTI crude oil. Top: 30-day ATM implied volatility at each month-end and the realised volatility of the roll-adjusted front contract over the following month (log scale). Bottom: the difference, in volatility points; blue months are gains for the volatility seller. Shaded areas are the crisis episodes of Table~\ref{tab:crises}.}
+\label{fig:premium}
+\end{figure}
+
+Table~\ref{tab:premium} confirms the picture. Average implied volatility is \MeanIV\%, against \MeanRV\% realised. The volatility premium is positive in \ShareVolPos\% of months, with a median of \MedianVolPremium{} points, but its mean is only \VolPremium{} points and is not significant ($t=\VolPremiumT$). In variance terms the premium is even negative on average ($t=\VarPremiumT$), because squaring gives the rare months of extreme realised volatility a very large weight. Hypothesis H1, a significantly positive premium, is therefore not supported when the premium is measured against ATM volatility.
+
+\begin{table}[htbp]
+\centering
+\caption{The crude-oil volatility premium, \SampleStart{}--\SampleEnd}
+\label{tab:premium}
+\small
+\input{\tabdir/tab1_premium.tex}
+\par\smallskip
+\parbox{0.92\linewidth}{\footnotesize Monthly observations. Variances and volatilities are annualised and multiplied by 100. $t$ (NW) is the Newey--West $t$-statistic of the mean with three lags. ``Share $>0$'' is the fraction of months with a positive value.}
+\end{table}
+
+\subsection{Unmanaged and managed strategies}
+
+Table~\ref{tab:perf} reports the performance of the unmanaged short variance strategy and the seven managed versions, all scaled to 10\% annual volatility. The unmanaged strategy earns a positive return in \UnmPosShare\% of months but has a Sharpe ratio of \UnmSharpe, a skewness of \UnmSkew{} and excess kurtosis of \UnmKurt. Its worst month loses \UnmWorst\% and its maximum drawdown reaches \UnmMDD\%. These losses are concentrated in a few months (Hypothesis H2): excluding March and April 2020 alone raises the Sharpe ratio to \UnmSharpeExCovid{} (Table~\ref{tab:robust}).
+
+\begin{table}[htbp]
+\centering
+\caption{Performance of unmanaged and managed short-variance strategies}
+\label{tab:perf}
+\resizebox{\linewidth}{!}{\input{\tabdir/tab2_performance.tex}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize All strategies are scaled to 10\% annualised volatility over the full sample. Mean is annualised (\%). MaxDD is the maximum drawdown of cumulative P\&L (\%). CVaR95 and CVaR99 are the average monthly losses beyond the 5\% and 1\% quantiles (\%). Worst is the worst monthly return (\%). Avg $w$ is the average weight before scaling.}
+\end{table}
+
+Five of the seven rules raise the Sharpe ratio; the backwardation rule leaves it unchanged and the term-structure rule lowers it slightly. The best rule is the \BestRule{} (Sharpe ratio \BestSharpe), which also cuts the maximum drawdown from \UnmMDD\% to \BestMDD\%. Figure~\ref{fig:cum} shows where the gains come from. Volatility scaling and the premium filter add value mainly in 2008--2014 and lose part of it after 2014; rules based on implied volatility help mainly in 2020. Figure~\ref{fig:weights} shows how often each rule is active.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\linewidth]{fig2_cumulative.pdf}
+\caption{Cumulative P\&L of each managed strategy (blue) against the unmanaged strategy (grey). All strategies are scaled to 10\% annualised volatility; P\&L is summed, not compounded, because the position is an unfunded swap.}
+\label{fig:cum}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{fig3_weights.pdf}
+\caption{Weights chosen by each timing rule at each month-end (before volatility matching). A weight of 1 is the unmanaged exposure.}
+\label{fig:weights}
+\end{figure}
+
+\subsection{Is the improvement significant?}
+
+Table~\ref{tab:spanning} reports the spanning regressions and the bootstrap tests. None of the alphas is significant at the 5\% level (\NSigAlpha{} of 7), and none of the Sharpe-ratio differences is significant (\NSigSR{} of 7). The bootstrap confidence intervals are wide: about twenty years of monthly data, dominated by a few extreme months, cannot distinguish a modest improvement from luck. This is the central limitation of a single-commodity test, and one reason to pool the evidence across four commodities in the final thesis.
+
+\begin{table}[htbp]
+\centering
+\caption{Spanning regressions and Sharpe-ratio differences}
+\label{tab:spanning}
+\small
+\resizebox{\linewidth}{!}{\input{\tabdir/tab3_spanning.tex}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize Regressions of each managed strategy on the unmanaged strategy, both scaled to 10\% annual volatility. $\alpha$ is annualised (\%); $t(\alpha)$ uses Newey--West standard errors with three lags. AR is the annualised appraisal ratio. $\Delta$SR is the difference in Sharpe ratios versus the unmanaged strategy; the p-value and 95\% interval come from a circular block bootstrap (6-month blocks, 5{,}000 draws).}
+\end{table}
+
+\subsection{Crisis episodes}
+
+Table~\ref{tab:crises} reports cumulative P\&L in five stress episodes. The COVID-19 episode dominates: the unmanaged strategy loses \CovidUnm\% of capital at 10\% volatility. Volatility scaling and the implied-vol jump rule cut this loss to about 31--32\%, and the premium filter to 39\%. No rule protects in every crisis. In 2008, rules based on realised volatility and the premium filter cut the loss from 13\% to 4--9\%, while the implied-volatility rules made it worse, because implied volatility rose only after the sell-off had begun. In 2020 the order is reversed. This pattern supports a combination of realised- and implied-volatility signals, which the next draft will test.
+
+\begin{table}[htbp]
+\centering
+\caption{Cumulative P\&L in crisis episodes (\%)}
+\label{tab:crises}
+\small
+\resizebox{\linewidth}{!}{\input{\tabdir/tab4_crises.tex}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize Sum of monthly returns, scaled to 10\% annual volatility, over the months of each episode: GFC Sep--Dec 2008; commodity crash Jul 2014--Feb 2016; COVID Feb--Apr 2020; Ukraine Feb--Jun 2022; tariffs Mar--Apr 2025. Months are labelled by the month in which the return is realised.}
+\end{table}
+
+\subsection{Robustness}
+\label{sec:robust}
+
+\paragraph{Transaction costs.} Table~\ref{tab:costs} subtracts a bid-ask cost of 0.5 to 2 volatility points per monthly trade. Costs lower the unmanaged Sharpe ratio by about 0.06 per half point. They hit volatility scaling hardest, because its average weight is the highest: from one point of cost it no longer beats the unmanaged strategy. The premium filter remains the best rule at every cost level.
+
+\begin{table}[htbp]
+\centering
+\caption{Sharpe ratios net of transaction costs}
+\label{tab:costs}
+\small
+\input{\tabdir/tab5_costs.tex}
+\par\smallskip
+\parbox{0.8\linewidth}{\footnotesize The cost is the number of volatility points below mid at which variance is sold each month, charged in proportion to the weight.}
+\end{table}
+
+\paragraph{Out-of-sample scaling.} Table~\ref{tab:oos} splits the sample in 2016. In 2007--2016, volatility scaling and the premium filter turn a negative Sharpe ratio into a positive one. In 2017--2026 all strategies have negative Sharpe ratios, and volatility scaling does worse than the unmanaged strategy, echoing the out-of-sample critique of \citet{cederburg2020}. When each strategy is scaled with its 2007--2016 volatility, however, the three implied-volatility rules roughly halve the out-of-sample maximum drawdown and 99\% CVaR. This is consistent with Hypothesis H4: implied volatility reprices faster than realised volatility in a sudden shock.
+
+\begin{table}[htbp]
+\centering
+\caption{Sub-periods and out-of-sample risk}
+\label{tab:oos}
+\small
+\resizebox{\linewidth}{!}{\input{\tabdir/tab6_subperiods.tex}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize Sharpe ratios in 2007--\SplitYear{} (in-sample) and \SplitYear--2026 (out-of-sample). Out-of-sample risk measures scale each strategy with the volatility it had in-sample, so they use no future information; the out-of-sample volatility shows how far each strategy drifted from the 10\% target.}
+\end{table}
+
+\paragraph{Design choices.} Table~\ref{tab:robust} varies the roll date, the burn-in period, the percentile threshold and the size of the cut. The ranking of rules is mostly stable, but volatility scaling is sensitive to the burn-in period: with 36 months its advantage disappears. Two further variants matter. Exiting instead of halving makes the implied-vol trend rule break even (Sharpe ratio 0.04). Replacing the variance swap with a volatility swap (P\&L $=\sigma_{IV}-\sigma_{RV}$) turns all Sharpe ratios positive, because a volatility swap is not exposed to the convexity of variance in extreme months.
+
+\begin{table}[htbp]
+\centering
+\caption{Robustness: Sharpe ratios under alternative designs}
+\label{tab:robust}
+\resizebox{\linewidth}{!}{\input{\tabdir/tab7_robustness.tex}}
+\par\smallskip
+\parbox{0.95\linewidth}{\footnotesize UM unmanaged; VS volatility scaling; RVT realised-vol threshold; IVJ implied-vol jump; IVT implied-vol trend; TS term structure; PF premium filter; BW backwardation. Sharpe ratios of unscaled monthly returns (scaling does not change the Sharpe ratio).}
+\end{table}
+
+\paragraph{The variance strike.} The most important assumption is the strike. Table~\ref{tab:strike} adds 1 to 4 volatility points to the ATM strike, a plausible range for the convexity and skew premium in the fair variance-swap strike. The unmanaged strategy breaks even at \BreakEvenStrike{} points. More importantly, the advantage of timing grows with the strike: with three extra points, volatility scaling earns a Sharpe ratio several times that of the unmanaged strategy. Measuring the strike correctly is therefore essential before drawing conclusions, and is the first task for the next draft.
+
+\begin{table}[htbp]
+\centering
+\caption{Sharpe ratios with a higher variance strike}
+\label{tab:strike}
+\small
+\input{\tabdir/tab8_strike.tex}
+\par\smallskip
+\parbox{0.8\linewidth}{\footnotesize The strike is ATM implied volatility plus the number of volatility points in each column.}
+\end{table}
+
+\section{Discussion and next steps}
+
+This first draft establishes the full pipeline and three provisional results for crude oil: the ATM-measured premium is too small to survive the 2020 shock; timing rules help modestly but not significantly; and implied-volatility rules reduce out-of-sample tail risk. Four limitations set the agenda for the next draft.
+
+\begin{enumerate}
+\item \textbf{The strike.} Replace ATM volatility with the model-free OVX index (available free from FRED since 2007) and check the difference against Bloomberg's ATM series. Because OVX is computed on options on the USO fund rather than on futures, realised volatility will be computed on USO as a cross-check.
+\item \textbf{Rebalancing frequency.} Rules are applied monthly. A daily-monitored version of the implied-vol jump rule (exit when the signal fires, re-enter when it normalises) is closer to practice and may matter most in 2020.
+\item \textbf{Traded options.} A delta-hedged short straddle on listed CL options will confirm the results on traded prices and realistic costs.
+\item \textbf{Cross-commodity evidence.} The same code will run on gold (GC), copper (HG) and corn (C). Pooling four commodities addresses the low statistical power of a single-commodity test and tests Hypothesis H3: timing should help most where volatility clusters (oil, copper) and least where it is seasonal (corn).
+\end{enumerate}
+
+\bigskip
+\noindent\textit{Declaration of AI use.} [Tool name, date] was used for [purpose]. \textit{(To be completed according to EDHEC guidelines and agreed with the supervisor.)}
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\appendix
+\section{Validation of the contract calendar}
+
+\begin{table}[htbp]
+\centering
+\caption{CL1--CL2 spread changes around reconstructed last trading days}
+\label{tab:calendar}
+\small
+\input{\tabdir/tabA1_calendar.tex}
+\par\smallskip
+\parbox{0.85\linewidth}{\footnotesize Median absolute daily change in $\ln(F_1/F_2)$ on days at each offset from the reconstructed last trading day, and its ratio to the median over all days. Both generic series switch contract on offset +1, which is where the spike should appear.}
+\end{table}
+
+\end{document}
