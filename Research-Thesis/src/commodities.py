@@ -1,4 +1,8 @@
-"""Commodity specifications and futures contract calendars.
+"""Instrument specifications and futures contract calendars.
+
+Futures (commodities, government bond futures) are in SPECS; instruments
+traded as a single continuous series (credit ETFs, the CDX IG index) are in
+SPOT_SPECS. INSTRUMENTS holds both.
 
 Each commodity needs two dates per contract:
   * last trading day (LTD): when the Bloomberg generics F1/F2 switch to
@@ -42,7 +46,52 @@ SPECS = {
               ltd="bd_before_15th", fnd="last_bd_prior_month"),
     "S": dict(name="Soybeans", exchange="CBOT", cycle="FHKNQUX",
               ltd="bd_before_15th", fnd="last_bd_prior_month"),
+    # Government bond futures. Options are quoted far closer to the money than
+    # 90%/110% moneyness, so the variance strike is ATM (smile=False).
+    "TU": dict(name="US 2-year note", exchange="CBOT", cycle="HMUZ", asset="Rates",
+               ltd="last_bd_of_month", fnd="last_bd_prior_month", smile=False),
+    "FV": dict(name="US 5-year note", exchange="CBOT", cycle="HMUZ", asset="Rates",
+               ltd="last_bd_of_month", fnd="last_bd_prior_month", smile=False),
+    "TY": dict(name="US 10-year note", exchange="CBOT", cycle="HMUZ", asset="Rates",
+               ltd="seventh_bd_before_last_bd", fnd="last_bd_prior_month", smile=False),
+    "US": dict(name="US Treasury bond", exchange="CBOT", cycle="HMUZ", asset="Rates",
+               ltd="seventh_bd_before_last_bd", fnd="last_bd_prior_month", smile=False),
+    "RX": dict(name="Euro-Bund", exchange="Eurex", cycle="HMUZ", asset="Rates",
+               ltd="eurex_two_days_before_10th", fnd=None, smile=False),
 }
+for _c in ["CL", "NG"]:
+    SPECS[_c]["asset"] = "Energy"
+for _c in ["GC", "SI", "HG"]:
+    SPECS[_c]["asset"] = "Metals"
+for _c in ["C", "W", "S"]:
+    SPECS[_c]["asset"] = "Grains"
+
+# Continuous series: no contract calendar. `units`:
+#   "log" -> daily log returns of the price, implied vol in % of price;
+#   "bp"  -> daily spread changes in bp/100, implied vol in bp (normal vol),
+#            so one "vol point" is one basis point of annualised spread vol.
+SPOT_SPECS = {
+    "HYG": dict(name="High-yield bond ETF (HYG)", exchange="NYSE Arca", asset="Credit",
+                units="log", smile=False, ticker="HYG US EQUITY"),
+    "LQD": dict(name="Investment-grade bond ETF (LQD)", exchange="NYSE Arca", asset="Credit",
+                units="log", smile=False, ticker="LQD US EQUITY"),
+    "CDXIG": dict(name="CDX North America IG 5Y", exchange="OTC", asset="Credit",
+                  units="bp", smile=False, ticker="VIXIG INDEX",
+                  pair=("VIXIG INDEX", "CDX IG"), roll_dates=((3, 20), (9, 20))),
+    # Equity benchmark: S&P 500 index with the VIX (model-free 30-day implied
+    # vol) as the variance strike, from a sheet with 'VIX Index' in cell A1
+    "SPX": dict(name="S&P 500 (VIX strike)", exchange="Cboe", asset="Equity",
+                units="log", smile=False, ticker="VIX INDEX", pair=("VIX INDEX", "SPX INDEX")),
+}
+INSTRUMENTS = {**SPECS, **SPOT_SPECS}
+
+
+def is_spot(code):
+    return code in SPOT_SPECS
+
+
+def uses_smile(code):
+    return INSTRUMENTS[code].get("smile", True)
 
 
 def bloomberg_ticker(code, n):
@@ -51,7 +100,12 @@ def bloomberg_ticker(code, n):
 
 
 def detect_code(ticker):
-    """'CL1 COMB Comdty' -> 'CL', 'C 1 Comdty' -> 'C'."""
+    """'CL1 COMB Comdty' -> 'CL', 'C 1 Comdty' -> 'C', 'HYG US Equity' -> 'HYG',
+    'VIXIG Index' (credit sheet) -> 'CDXIG'."""
+    t = " ".join(str(ticker).upper().split())
+    for code, s in SPOT_SPECS.items():
+        if t == s["ticker"]:
+            return code
     m = re.match(r"\s*([A-Z]{1,3})\s*\d", str(ticker).upper())
     return m.group(1) if m else None
 
@@ -103,8 +157,47 @@ def last_bd_prior_month(m, days):
     return (d[-1] if len(d) else None), (m - 1).end_time.normalize()
 
 
+def last_bd_of_month(m, days):
+    """CBOT 2- and 5-year notes: last business day of the delivery month."""
+    d = _month_days(days, m)
+    return (d[-1] if len(d) else None), m.end_time.normalize()
+
+
+def seventh_bd_before_last_bd(m, days):
+    """CBOT 10-year note and bond: seventh business day before the last
+    business day of the delivery month."""
+    d = _month_days(days, m)
+    return (d[-8] if len(d) >= 8 else None), m.end_time.normalize()
+
+
+def eurex_two_days_before_10th(m, days):
+    """Eurex Bund: delivery on the 10th calendar day of the delivery month
+    (next exchange day if not one); last trading day two exchange days before."""
+    d10 = pd.Timestamp(m.year, m.month, 10)
+    after = days[days >= d10]
+    if not len(after) or after[0].to_period("M") != m:
+        return None, d10
+    delivery = after[0]
+    before = days[days < delivery]
+    return (before[-2] if len(before) >= 2 else None), delivery
+
+
 RULES = {f.__name__: f for f in [cl_25th_prior_month, three_bd_before_month, third_last_bd,
-                                  bd_before_15th, last_bd_prior_month]}
+                                  bd_before_15th, last_bd_prior_month, last_bd_of_month,
+                                  seventh_bd_before_last_bd, eurex_two_days_before_10th]}
+
+
+def spot_excluded_days(code, trading_days):
+    """Days whose return is not a market move: the CDX generic switching to
+    the new series (first trading day on or after 20 March / 20 September)."""
+    days = pd.DatetimeIndex(trading_days)
+    out = []
+    for mon, day in SPOT_SPECS[code].get("roll_dates", ()):
+        for y in range(days[0].year, days[-1].year + 1):
+            after = days[days >= pd.Timestamp(y, mon, day)]
+            if len(after) and (after[0] - pd.Timestamp(y, mon, day)).days < 7:
+                out.append(after[0])
+    return pd.DatetimeIndex(sorted(out))
 
 
 def contract_calendar(code, trading_days):

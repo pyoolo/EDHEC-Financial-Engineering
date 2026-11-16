@@ -9,7 +9,9 @@ All signals in a row use information up to the decision date only; the
 import numpy as np
 import pandas as pd
 
-from config import ANNUALISATION, IV_FIELD, IV_JUMP_WINDOW, IV_TREND_WINDOW
+from config import ANNUALISATION, IV_FIELD, IV_JUMP_WINDOW, IV_TREND_WINDOW, STRIKE
+from implied_variance import smile_variance
+from load_data import smile_columns
 
 
 def realised_variance(ret, start, end):
@@ -18,9 +20,9 @@ def realised_variance(ret, start, end):
     return ANNUALISATION * np.mean(r.values ** 2), len(r)
 
 
-def build_panel(daily, front):
+def build_panel(daily, front, strike=STRIKE):
     d = daily.copy()
-    for c in ["iv30", "iv1m", "iv2m"]:
+    for c in [c for c in d.columns if c.startswith("iv")]:
         d[c] = d[c].ffill(limit=3)          # bridge isolated missing quotes
     d["iv_ma"] = d[IV_FIELD].rolling(IV_TREND_WINDOW, min_periods=IV_TREND_WINDOW // 2).mean()
     d["iv_chg5"] = np.log(d[IV_FIELD] / d[IV_FIELD].shift(IV_JUMP_WINDOW))
@@ -39,7 +41,7 @@ def build_panel(daily, front):
         rows.append({
             "decision_date": t,
             "month": t.to_period("M") + 1,          # realisation month
-            "iv": x[IV_FIELD] / 100,
+            "iv_atm": x[IV_FIELD] / 100,
             "iv1m": x["iv1m"] / 100,
             "iv2m": x["iv2m"] / 100,
             "iv_over_ma": x[IV_FIELD] / x["iv_ma"],
@@ -50,6 +52,18 @@ def build_panel(daily, front):
             "n_days": n_next,
         })
     p = pd.DataFrame(rows).set_index("month")
+
+    # smile-adjusted strike at each decision date
+    smile = smile_columns(d)
+    if len(smile) > 1:
+        vols = d.loc[p["decision_date"], list(smile.values())].to_numpy() / 100
+        p["iv_smile"] = np.sqrt(smile_variance(np.array(list(smile)) / 100, vols))
+    else:
+        p["iv_smile"] = np.nan
+    if strike == "smile" and p["iv_smile"].notna().any():
+        p["iv"] = p["iv_smile"].fillna(p["iv_atm"])
+    else:
+        p["iv"] = p["iv_atm"]
     p = p.dropna(subset=["iv", "rv_next"])
     # short variance-swap P&L per unit of vega notional (decimal return)
     p["ret_short_var"] = (p["iv"] ** 2 - p["rv_next"]) / (2 * p["iv"])

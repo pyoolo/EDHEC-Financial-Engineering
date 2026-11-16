@@ -1,0 +1,38 @@
+# --- Data: Bloomberg data are licensed and must never be committed ---------
+data/**
+!data/README.md
+!data/raw/
+!data/raw/.gitkeep
+*.xlsx
+*.xls
+*.csv
+*.parquet
+
+# --- Generated outputs (rebuilt by `python src/run_all.py`) ------------------
+results/**
+!results/.gitkeep
+paper/numbers.tex
+paper/generated/
+paper/*.pdf
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+paper/*.toc
+
+# --- Python / editors ---------------------------------------------------------
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+~$*

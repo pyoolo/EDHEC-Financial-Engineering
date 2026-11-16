@@ -1,0 +1,84 @@
+% =====================================================================
+%  Two-page summary of the paper (same generated numbers and figures)
+%  Compile from this folder:  latexmk -pdf summary.tex
+% =====================================================================
+\documentclass[10pt,a4paper]{article}
+\usepackage[a4paper,margin=1.8cm,top=1.6cm,bottom=1.6cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{mathptmx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage[colorlinks=true,urlcolor=blue!50!black,linkcolor=blue!50!black]{hyperref}
+
+\definecolor{accent}{HTML}{1C5CAB}
+\definecolor{panel}{HTML}{F3F6FB}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist{itemsep=1pt,topsep=2pt,leftmargin=1.2em}
+\pagestyle{empty}
+\newcommand{\head}[1]{\par\smallskip{\large\bfseries\color{accent}#1}\par\smallskip}
+
+\input{generated/numbers}
+
+\begin{document}
+
+{\LARGE\bfseries Where Is the Volatility Risk Premium?}\\[3pt]
+{\large Commodities, rates, credit and the limits of volatility timing \textbar{} Summary}\\[3pt]
+{\small Paolo Mastrogiacomo, EDHEC Business School \textbar{} Supervisor: Prof.\ Enrique Schroth \textbar{} \today}
+
+\begin{tcolorbox}[colback=panel,colframe=panel,boxrule=0pt,arc=2pt,left=7pt,right=7pt,top=5pt,bottom=5pt]
+{\bfseries\color{accent} In one paragraph.} Selling one-month variance earns a premium comparable to the equity premium in bond futures, investment-grade credit (CDX IG), corn and soybeans, and none in energy, metals, wheat or credit ETFs. Equity-style volatility-timing rules do not help outside equities and credit. A simple mean--variance framework predicts where they help: only where the conditional Sharpe ratio falls when volatility rises, which is the case for the S\&P~500 and CDX IG and nowhere else in the sample.
+\end{tcolorbox}
+
+\head{Question and design}
+Does the variance risk premium documented in equities exist in other asset classes, and do volatility-timing rules improve short-volatility strategies there? I sell a synthetic one-month variance swap at each month-end on \NInstr{} instruments (8 commodity futures, 5 bond futures, HYG, LQD, CDX IG), 2007--2026, with the S\&P~500 as benchmark. One design throughout: rolled futures with validated exchange calendars, smile-based or ATM strike (Credit VIX and VIX for CDX IG and the S\&P~500), seven pre-specified timing rules, Newey--West tests, block-bootstrap Sharpe tests, multiple-testing control.
+
+\head{Finding 1: the premium is concentrated}
+\begin{center}
+\includegraphics[width=0.92\linewidth]{generated/fig_premium.pdf}
+\end{center}
+\vspace{-6pt}
+{\footnotesize Implied minus realised volatility in \% of implied volatility (95\% CI) and Sharpe ratio of short one-month variance; dashed: S\&P~500 (VIX strike).}
+
+\begin{itemize}
+\item \textbf{Bond futures:} significant in all five ($t$ from \VPtThirtyy{} to \VPtBund), Sharpe $\SRThirtyy$--$\SRBund$, in the US and Germany, with an ATM strike that understates the premium.
+\item \textbf{CDX IG:} \VPCdx{} bp of spread volatility a year ($t=\VPtCdx$), positive in \PosCdx\% of months and in all \CdxYears{} years; Sharpe $\SRCdx$.
+\item \textbf{Corn and soybeans:} Sharpe $\SRCorn$ and $\SRSoy$ ($t=\VPtCorn$ and \VPtSoy); seasonal, negative in the months of the main USDA reports.
+\item \textbf{None:} crude oil, natural gas, gold, silver, copper, wheat, HYG, LQD.
+\end{itemize}
+
+\newpage
+\head{Finding 2: equity-style timing does not travel}
+Of \NTests{} rule-by-market changes in Sharpe ratio, \NSig{} are significant at 5\% (\NSigUp{} better, \NSigDown{} worse), against about \NExpected{} expected by chance; none survives a Holm correction. Inverse-variance scaling improves only \Upvolscaling{} of \Nvolscaling{} markets. The exceptions are CDX IG, where exiting after a 20\% jump in implied volatility lifts the Sharpe ratio from $\SRCdx$ to $\SRCdxIVJ$ by avoiding March 2020, and the S\&P~500, where volatility scaling lifts it from $\SRSpx$ to $\SRSpxVS$ ($p=\PSpxVS$).
+
+\head{Finding 3: the mechanism predicts where timing works}
+If the premium scales with variance as $v^b$ and its risk as $v^2$, de-risking after volatility rises pays most when $b<1$, so that the conditional Sharpe ratio falls in volatile months. Estimated without any timing rule, $b<1$ holds in exactly two markets: CDX IG (conditional Sharpe $\QoneSRCdx$ in the calmest fifth of months, $\QfiveSRCdx$ in the most volatile) and the S\&P~500 ($\QoneSRSpx$ to $\QfiveSRSpx$). These are the two markets where timing helps. In bonds and grains the conditional Sharpe ratio is flat or rising, and timing adds nothing.
+
+\begin{center}
+\includegraphics[width=0.95\linewidth]{generated/fig_quintiles.pdf}
+\end{center}
+\vspace{-6pt}
+{\footnotesize Conditional Sharpe ratio of short variance by quintile of past-month realised variance; thick lines: asset-class averages.}
+
+\head{Caveats}
+\begin{itemize}
+\item \textbf{Costs decide implementability.} At 2.5\% of implied volatility per trade the bond Sharpe ratios fall to $\SRcostAThirtyy$--$\SRcostABund$; at 5\% only CDX IG ($\SRcostBCdx$), corn ($\SRcostBCorn$) and soybeans ($\SRcostBSoy$) remain positive.
+\item \textbf{Tails remain.} An equal-weighted portfolio of all \NInstr{} strategies has a Sharpe ratio of $\SRAll$ but skewness $\SkewAll$; its Sharpe ratio falls from $\SRAllA$ (2007--16) to $\SRAllB$ (2017--26).
+\item \textbf{Concentration.} The CDX result rests on one index since 2012; March 2020 cost as much as \CdxWorstMultiple{} months of average premium.
+\item \textbf{Interpretation ex post.} The premium appears where options are bought by natural hedgers (banks and insurers in rates and credit, producers in grains). This explanation was formed after seeing the data.
+\end{itemize}
+
+\head{Next steps}
+\begin{enumerate}
+\item Model-free strike for bonds and ETFs (95, 97.5, 102.5, 105\% moneyness).
+\item More credit indices: iTraxx Main, iTraxx Crossover, CDX HY.
+\item Out-of-sample test of the hedging-demand explanation on new markets (softs, livestock: premium predicted; Brent, heating oil: none predicted), with predictions recorded before running the code.
+\item Mechanism tests with hedgers' option positions (CFTC), open interest, intermediary capital and USDA report dates.
+\item Bid--ask quotes on listed options to measure costs.
+\end{enumerate}
+
+\end{document}
