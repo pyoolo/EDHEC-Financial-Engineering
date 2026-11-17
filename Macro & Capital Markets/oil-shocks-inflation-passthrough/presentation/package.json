@@ -1,0 +1,8 @@
+{
+  "name": "oil-shocks-presentation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds Oil_shocks_inflation_presentation.pptx from the analysis charts",
+  "scripts": { "build": "node build_deck.js" },
+  "dependencies": { "pptxgenjs": "^4.0.1" }
+}
