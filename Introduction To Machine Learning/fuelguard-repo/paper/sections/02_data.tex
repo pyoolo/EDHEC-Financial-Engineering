@@ -1,0 +1,46 @@
+\section{Data}\label{sec:data}
+
+\paragraph{Sources, period, unit.} We use 21 daily market series, January 2007 -- November 2026
+(Appendix~\ref{app:data}): 20 from Bloomberg (diesel, Brent, WTI and natural-gas futures for the first two
+maturities; implied volatilities of diesel and Brent; copper, gold, US Treasury futures; VIX and 3-month VIX;
+S\&P~500 and the US and European energy-sector indices; US and euro-area inflation expectations) and the
+ECB EUR/USD reference rate. The unit of observation is a \textbf{trading day} of the NYMEX diesel contract;
+after building features (one year of history) and removing the last month, whose outcome is not yet known,
+the modelling sample has \textbf{4\,701 days (January 2008 -- October 2026)}.
+
+\paragraph{Diesel price.} The Bloomberg licence available to us did not include the ICE Gasoil contract,
+the European diesel benchmark. We use the NYMEX New York Harbor ULSD futures (ticker HO), which prices the
+same product (ultra-low-sulphur diesel), is the most liquid diesel contract in the world and is strongly
+correlated with Gasoil. Prices in US cents per gallon are converted to \textbf{euros per litre} with the
+same-day ECB rate (fixed at 14:15 CET, before the NYMEX settlement). The price varies between 0.15 and
+1.29~EUR/l (mean 0.52); Figure~\ref{fig:price} shows the 2008 peak, the 2014--16 and 2020 collapses
+and the 2022 energy crisis.
+
+\paragraph{Targets without look-ahead and without roll bias.} A decision taken at the close of day $t$ is
+executed at the settlement of $t+1$; the hedged month is days $t+2,\dots,t+22$. The \emph{market cost}
+$M_t$ is the average diesel price over these 21 days. The \emph{lockable price} $P_t$ is a strip of futures
+settled on $t+1$: each day of the hedged month is priced with the contract that will be front month on that
+day (the generic series roll on the first trading day of each month). Comparing different delivery months
+would create a spurious gain from locking in backwardated markets: a first version of our analysis made this
+mistake and found that always locking saved 4.6\% over 2022--2026, against 2.2\% (before any hedging margin)
+with the correct strip. The premium is $R_t=M_t/P_t-1$ and the
+spike label is $S_t=\1\{R_t>5\%\}$. Spikes occur on 19.2\% of days, from 0.4\% (2014) to 51\% (2026).
+
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{fig1_price_target.pdf}
+\caption{Diesel price and target. Top: wholesale diesel price in EUR/litre. Bottom: premium $R_t$ of next
+month's market cost over the price lockable at $t$; red areas are spikes ($R_t>5\%$). The shaded period
+is the out-of-sample evaluation (2012--2026).}
+\label{fig:price}
+\end{figure}
+
+\paragraph{Preparation.} (i) Calendars differ across exchanges, so all series are aligned on diesel
+trading days and gaps are filled \emph{forward only}, for at most five days. (ii) One implied volatility of
+1.7\% (12 September 2007) is a data error; values below 5\% are treated as missing. (iii) WTI was negative on
+20 April 2020; it enters only through ratios scaled by the second-month price. (iv) From the 21 raw series
+we build \textbf{57 features} in eight groups: returns over 5, 21 and 63 days for eleven markets (33);
+futures-curve slopes (4); the diesel crack spread and its change (2); implied and realised volatility,
+the volatility risk premium and the VIX term structure (8); inflation expectations and their changes (4);
+the price relative to its one-year average (2); the past realised premium and spike rate, lagged so that
+they are known at $t$ (2); and month of the year (2). Every feature uses data up to $t$ only. An automated
+test scrambles all prices after a date and checks that no feature before that date changes.

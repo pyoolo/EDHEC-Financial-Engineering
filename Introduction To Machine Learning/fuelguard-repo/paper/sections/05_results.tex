@@ -1,0 +1,121 @@
+\section{Results}\label{sec:results}
+
+\subsection{Can the next month's diesel cost be predicted?}
+
+\paragraph{The premium (regression): no.} No model beats the futures price as a forecast of next month's
+cost (Table~\ref{tab:reg}). The best out-of-sample $R^2$ against the futures benchmark is 0.5\% (historical
+mean) and none of the Diebold--Mariano tests rejects equal accuracy (all $p\ge0.11$); gradient boosting is
+5\% \emph{worse} than the futures. Tuning tells the same story: in every training window the cross-validation
+chose the strongest ridge penalty in the grid ($\alpha=10^4$), i.e.\ it shrank the model to a constant. This
+is what market efficiency predicts \citep{fama1987,alquist2013}, and it means FuelGuard cannot promise
+to buy cheaper on average.
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/regression_oos.tex}
+\caption{Regression of the premium, out of sample 2012--2026 (3\,725 days). $R^2_{OS}$ and the DM test
+are relative to the futures price (zero premium); DM uses Newey--West errors with 21 lags.}
+\label{tab:reg}
+\end{table}
+
+\paragraph{Spikes (classification): yes, modestly, and mostly through volatility.} Table~\ref{tab:clf}
+shows that all models rank spike days better than chance (AUC 0.59--0.69, 90\% block-bootstrap intervals
+all above 0.5, Appendix~\ref{app:additional}). Only two models produce \emph{probabilities} better than the
+historical frequency: the random forest (Brier skill +4.1\%, interval [+1.5\%, +6.6\%]) and a one-feature
+logistic regression on diesel implied volatility (+5.1\%, [+1.5\%, +8.7\%]). The full logistic and boosting
+models have no probabilistic skill: their extra features add variance that the penalty removes only by
+pushing predictions back to the base rate (the logistic chose the strongest penalty, $C=0.001$, in 14 of 15
+years). This is the bias--variance trade-off of Appendix~\ref{app:theory}, A.1, at work: the predictable part
+of the target is small, so a richer model mostly fits noise.
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/classification_oos.tex}
+\caption{Spike classification, out of sample 2012--2026 (3\,725 days, spike rate 19.4\%). Brier skill is
+relative to climatology (training base rate). Precision, recall and share flagged refer to the ``elevated
+risk'' flag $\hat\pi_t>\bar\pi$. Last row: days ranked by implied volatility, with no model.}
+\label{tab:clf}
+\end{table}
+
+\paragraph{A disclosure.} The one-feature model was \emph{not} in our original plan. After the first run,
+we found that ranking days by implied volatility alone, without any model, gives an AUC of 0.71, above every
+57-feature model. We then added the parsimonious logistic to the walk-forward, with the same tuning and
+leakage controls. Its result is therefore partly a finding \emph{about} our first models rather than an
+independent test, but the choice is economically natural (option-implied volatility is the market's own
+forecast of the size of future moves) and it was not tuned on the test years.
+
+\begin{figure}[t]
+\centering
+\begin{minipage}{0.64\textwidth}\includegraphics[width=\linewidth]{fig3_auc_by_year.pdf}\end{minipage}\hfill
+\begin{minipage}{0.33\textwidth}\includegraphics[width=\linewidth]{fig4_calibration.pdf}\end{minipage}
+\caption{Left: AUC by test year. Right: reliability diagram (predicted vs observed spike frequency by
+octile of predicted probability, pooled 2012--2026).}
+\label{fig:auc}
+\end{figure}
+
+\paragraph{Stability.} Pooled numbers hide a lot of variation (Figure~\ref{fig:auc}, left). Models do well
+in 2013, 2016 and 2019--2020 and badly in 2023 and 2026, when most AUCs fall to 0.2--0.4. In both years,
+spike days had \emph{lower} implied volatility than the other days of the year (in 2026, 51\% against
+66\%): the shocks started from relatively calm markets, and in 2026 volatility rose only after the
+spike had begun, so a volatility-based signal was late. Part of the pooled AUC therefore comes from separating turbulent \emph{years} from calm ones rather
+than predicting the exact month. The reliability diagram (right) shows that probabilities are roughly
+calibrated but compressed: predictions above 40\% occur on fewer than 4\% of days, even in years when half of the days are spikes.
+
+\paragraph{What drives the predictions.} For the random forest, permutation importance
+(Figure~\ref{fig:imp}) is dominated by recent momentum (21-day diesel return), the price level relative to
+its one-year average and volatility measures. Individual importances are small (below one AUC point) and
+inflation expectations have \emph{negative} importance: shuffling them improves the test AUC, a direct sign
+of overfitting. The economic reading is coherent: spikes are more likely when prices are already rising,
+high relative to their history and volatile.
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.92\textwidth]{fig5_importance.pdf}
+\caption{Permutation importance of the random forest on the test years (mean over 2012--2026; drop in AUC
+when a feature is shuffled).}
+\label{fig:imp}
+\end{figure}
+
+\subsection{Does it help the haulier?}
+
+Table~\ref{tab:bt} and Figure~\ref{fig:tradeoff} evaluate 178 monthly decisions (January 2012 -- October
+2026) with a 1\% hedging margin. Never hedging costs 0.88\% more than the lockable price on average, but has a
+CVaR of 16.7\%: in the worst 5\% of months the firm pays about 2\,800~EUR more than it could have locked
+(26\% in the worst month). Always locking removes this risk at a cost of 1\% every month.
+
+\begin{table}[H]
+\centering\fittable{\tabdir/backtest_summary.tex}
+\caption{Hedging backtest, 178 monthly decisions, 2012--2026, hedge cost 1\%. ``Mean'', ``St.dev'',
+``CVaR95'' and ``Worst'' refer to the cost overrun $c_t/P_t-1$. EUR figures are for a firm using
+25\,000 litres a month. ML rules: $h=1$ if $\hat\pi>2\bar\pi$, $h=\tfrac12$ if $\hat\pi>\bar\pi$, else 0.}
+\label{tab:bt}
+\end{table}
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.85\textwidth]{fig6_tradeoff.pdf}
+\caption{Average cost against tail risk of each hedging rule (lower-left is better).}
+\label{fig:tradeoff}
+\end{figure}
+
+\paragraph{ML rules versus the market and naive rules.} All classification-based rules roughly halve the
+tail risk of never hedging (CVaR 9.4--11.3\% instead of 16.7\%) while hedging only 21--26\% of months, and
+they are cheaper on average than the market and than a constant 50\% hedge. The regression rule adds
+nothing, consistently with Table~\ref{tab:reg}.
+
+\paragraph{But a simple volatility rule does better.} Locking whenever implied volatility is above its
+historical median (known at the start of each year) dominates every ML rule: lower average cost (0.49\%),
+lower CVaR (6.8\%), only 8 months with an overrun above 5\%, and about 900~EUR instead of 2\,800~EUR of extra
+cost in a bad month for our reference firm. It hedges more often (52\% of months) than our pre-specified ML
+thresholds, which turned out too conservative. Figure~\ref{fig:budget} removes this difference by comparing
+signals at the \emph{same} hedging budget: the random forest and implied volatility select bad months about
+equally well, both better than spreading the same budget evenly for budgets up to 70\% of months, while momentum is worse than spreading it evenly.
+In other words, \textbf{the complex model learned a noisy version of the volatility signal}, and the gain of
+FuelGuard comes from hedging more when risk is high. The decision threshold matters as much as the model.
+These conclusions hold with hedging margins of 0\% and 2\% (Appendix~\ref{app:additional}).
+
+\begin{figure}[t]
+\centering\includegraphics[width=0.85\textwidth]{fig8_budget.pdf}
+\caption{Diagnostic (not a tradable rule: ranks use the whole test period). CVaR of the overrun when the
+haulier hedges the share $q$ of months with the highest signal. ``Constant ratio'' hedges a share $q$ of
+every month.}
+\label{fig:budget}
+\end{figure}

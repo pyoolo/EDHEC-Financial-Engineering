@@ -1,0 +1,33 @@
+\section{The product}\label{sec:product}
+
+\paragraph{Who uses it.} Road haulage in Italy is dominated by very small firms: the typical \emph{autotrasportatore}
+runs a handful of trucks. Diesel is one of their largest costs, typically around 30\% of operating costs,
+and their margins are a few percent of revenue. A ten-truck firm burns about 25\,000 litres a month, and
+the wholesale price rose by 32\% in a single month in March 2022 (+0.21~EUR/l, about 5\,000~EUR on a
+month's fuel bill), and by 60\% in March 2026. Such firms do not trade futures; they can, however, ask their fuel supplier or their bank for a
+fixed price for the next month. The question they cannot answer is \emph{when} fixing is worth its cost.
+
+\paragraph{The client.} We pitch FuelGuard to a \textbf{bank with a portfolio of SME loans to transport
+firms}. Fuel shocks are a credit-risk driver for these borrowers, and the bank can offer fixed-price fuel
+or simple commodity swaps. FuelGuard gives the bank a monthly, client-level signal it can distribute through
+its relationship managers or app: ``this month, the risk that diesel will cost more than the price you can
+fix today is high: fix 100\% (or 50\%) of your expected consumption''.
+
+\paragraph{The decision and the prediction.} On the first trading day of each month the firm chooses a
+hedge ratio $h\in\{0,\tfrac12,1\}$ for the next month's consumption. The product predicts:
+\begin{enumerate}
+\item \textbf{Main task (classification):} the probability that next month's average market price will
+exceed the price that can be locked today by more than 5\% (a \emph{spike});
+\item \textbf{Secondary task (regression):} the expected premium of next month's market cost over the
+lockable price.
+\end{enumerate}
+The 5\% threshold reflects what matters to the client: a cost overrun of more than 5\% is the order of
+magnitude that wipes out a haulier's monthly margin. Fixing a price is not free: we assume the supplier or
+bank charges a 1\% margin over the futures price, and test 0\% and 2\%.
+
+\paragraph{What it replaces (benchmarks).} Today a small haulier either never fixes (buys at the pump or
+rack price), always fixes, or follows a rule of thumb. We compare FuelGuard with these practices: never
+lock, always lock, always lock 50\%, a momentum rule (lock if prices rose last month) and a volatility rule
+(lock when implied volatility is above its historical median). For the statistical tasks, the benchmarks
+are the historical spike frequency (``climatology'') and the futures price itself, which in an efficient
+market is the best forecast of the future price \citep{fama1987,alquist2013}.

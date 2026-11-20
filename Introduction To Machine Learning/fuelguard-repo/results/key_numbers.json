@@ -1,0 +1,438 @@
+{
+ "bootstrap": {
+  "Logistic (implied vol only)": {
+   "AUC low": 0.64,
+   "AUC high": 0.735,
+   "P(AUC<=0.5)": 0.0,
+   "BSS low": 0.015,
+   "BSS high": 0.087,
+   "P(BSS<=0)": 0.01
+  },
+  "Logistic (L2)": {
+   "AUC low": 0.538,
+   "AUC high": 0.639,
+   "P(AUC<=0.5)": 0.002,
+   "BSS low": -0.026,
+   "BSS high": 0.032,
+   "P(BSS<=0)": 0.4
+  },
+  "Random forest": {
+   "AUC low": 0.587,
+   "AUC high": 0.694,
+   "P(AUC<=0.5)": 0.0,
+   "BSS low": 0.015,
+   "BSS high": 0.066,
+   "P(BSS<=0)": 0.005
+  },
+  "Gradient boosting": {
+   "AUC low": 0.564,
+   "AUC high": 0.665,
+   "P(AUC<=0.5)": 0.0,
+   "BSS low": -0.044,
+   "BSS high": 0.032,
+   "P(BSS<=0)": 0.582
+  }
+ },
+ "iv_auc_model_free": 0.713,
+ "best_clf": "Random forest",
+ "auc": {
+  "Climatology": 0.5,
+  "Logistic (implied vol only)": 0.689,
+  "Logistic (L2)": 0.589,
+  "Random forest": 0.643,
+  "Gradient boosting": 0.614,
+  "Implied vol rank (no model)": 0.713
+ },
+ "brier_skill": {
+  "Climatology": 0.0,
+  "Logistic (implied vol only)": 5.1,
+  "Logistic (L2)": 0.4,
+  "Random forest": 4.1,
+  "Gradient boosting": -0.5,
+  "Implied vol rank (no model)": NaN
+ },
+ "years_auc_above_05": {
+  "Logistic (L2)": 10,
+  "Random forest": 9,
+  "Gradient boosting": 8,
+  "Logistic (implied vol only)": 10
+ },
+ "n_years": 15,
+ "oos_days": 3725,
+ "oos_spike_rate": 0.194,
+ "reg_r2": {
+  "Historical mean": 0.47,
+  "Futures (zero premium)": 0.0,
+  "Ridge": 0.25,
+  "Random forest": -0.66,
+  "Gradient boosting": -5.03
+ },
+ "reg_dm_p": {
+  "Historical mean": 0.347,
+  "Futures (zero premium)": NaN,
+  "Ridge": 0.877,
+  "Random forest": 0.617,
+  "Gradient boosting": 0.114
+ },
+ "backtest_months": 178,
+ "backtest": {
+  "Never lock (market)": {
+   "Avg cost (EUR/l)": 0.539,
+   "Avg overrun (%)": 0.875,
+   "Overrun st.dev (%)": 6.575,
+   "CVaR95 overrun (%)": 16.693,
+   "Worst month (%)": 26.177,
+   "Months >5% overrun": 38.0,
+   "Avg hedge ratio": 0.0,
+   "CVaR95 extra cost (EUR/month)": 2769.001,
+   "Saving vs market (EUR/yr)": 0.0
+  },
+  "Always lock": {
+   "Avg cost (EUR/l)": 0.54,
+   "Avg overrun (%)": 1.0,
+   "Overrun st.dev (%)": 0.0,
+   "CVaR95 overrun (%)": 1.0,
+   "Worst month (%)": 1.0,
+   "Months >5% overrun": 0.0,
+   "Avg hedge ratio": 1.0,
+   "CVaR95 extra cost (EUR/month)": 248.68,
+   "Saving vs market (EUR/yr)": -78.437
+  },
+  "Always 50%": {
+   "Avg cost (EUR/l)": 0.539,
+   "Avg overrun (%)": 0.938,
+   "Overrun st.dev (%)": 3.287,
+   "CVaR95 overrun (%)": 8.846,
+   "Worst month (%)": 13.589,
+   "Months >5% overrun": 15.0,
+   "Avg hedge ratio": 0.5,
+   "CVaR95 extra cost (EUR/month)": 1485.314,
+   "Saving vs market (EUR/yr)": -39.218
+  },
+  "Momentum rule": {
+   "Avg cost (EUR/l)": 0.538,
+   "Avg overrun (%)": 0.634,
+   "Overrun st.dev (%)": 5.106,
+   "CVaR95 overrun (%)": 14.353,
+   "Worst month (%)": 24.073,
+   "Months >5% overrun": 16.0,
+   "Avg hedge ratio": 0.534,
+   "CVaR95 extra cost (EUR/month)": 2031.353,
+   "Saving vs market (EUR/yr)": 278.638
+  },
+  "Volatility rule": {
+   "Avg cost (EUR/l)": 0.537,
+   "Avg overrun (%)": 0.494,
+   "Overrun st.dev (%)": 2.917,
+   "CVaR95 overrun (%)": 6.847,
+   "Worst month (%)": 10.101,
+   "Months >5% overrun": 8.0,
+   "Avg hedge ratio": 0.517,
+   "CVaR95 extra cost (EUR/month)": 908.441,
+   "Saving vs market (EUR/yr)": 780.02
+  },
+  "ML: Logistic (implied vol only)": {
+   "Avg cost (EUR/l)": 0.538,
+   "Avg overrun (%)": 0.625,
+   "Overrun st.dev (%)": 4.275,
+   "CVaR95 overrun (%)": 9.525,
+   "Worst month (%)": 13.589,
+   "Months >5% overrun": 22.0,
+   "Avg hedge ratio": 0.205,
+   "CVaR95 extra cost (EUR/month)": 1554.209,
+   "Saving vs market (EUR/yr)": 375.885
+  },
+  "ML: Logistic (L2)": {
+   "Avg cost (EUR/l)": 0.538,
+   "Avg overrun (%)": 0.653,
+   "Overrun st.dev (%)": 4.584,
+   "CVaR95 overrun (%)": 10.65,
+   "Worst month (%)": 13.589,
+   "Months >5% overrun": 24.0,
+   "Avg hedge ratio": 0.205,
+   "CVaR95 extra cost (EUR/month)": 1800.479,
+   "Saving vs market (EUR/yr)": 414.091
+  },
+  "ML: Random forest": {
+   "Avg cost (EUR/l)": 0.539,
+   "Avg overrun (%)": 0.824,
+   "Overrun st.dev (%)": 4.11,
+   "CVaR95 overrun (%)": 9.397,
+   "Worst month (%)": 13.589,
+   "Months >5% overrun": 23.0,
+   "Avg hedge ratio": 0.258,
+   "CVaR95 extra cost (EUR/month)": 1618.747,
+   "Saving vs market (EUR/yr)": 121.48
+  },
+  "ML: Gradient boosting": {
+   "Avg cost (EUR/l)": 0.538,
+   "Avg overrun (%)": 0.745,
+   "Overrun st.dev (%)": 4.568,
+   "CVaR95 overrun (%)": 11.263,
+   "Worst month (%)": 16.857,
+   "Months >5% overrun": 23.0,
+   "Avg hedge ratio": 0.213,
+   "CVaR95 extra cost (EUR/month)": 1715.919,
+   "Saving vs market (EUR/yr)": 363.505
+  },
+  "ML: regression (GB)": {
+   "Avg cost (EUR/l)": 0.54,
+   "Avg overrun (%)": 0.947,
+   "Overrun st.dev (%)": 5.128,
+   "CVaR95 overrun (%)": 14.189,
+   "Worst month (%)": 24.073,
+   "Months >5% overrun": 26.0,
+   "Avg hedge ratio": 0.298,
+   "CVaR95 extra cost (EUR/month)": 2381.34,
+   "Saving vs market (EUR/yr)": -183.274
+  }
+ },
+ "regime_up_years": [
+  2012,
+  2016,
+  2019,
+  2021,
+  2022,
+  2023,
+  2024,
+  2026
+ ],
+ "top_features": [
+  "diesel_eur_ret21",
+  "GC1_ret5",
+  "NG_slope",
+  "diesel_z252",
+  "CL2_ret21",
+  "past_premium",
+  "month_sin",
+  "CO_iv"
+ ],
+ "group_importance": {
+  "Momentum (returns)": 1.56,
+  "Price level": 0.95,
+  "Volatility": 0.8,
+  "Futures curve": 0.29,
+  "Seasonality": 0.27,
+  "Refining margin": -0.11,
+  "Past outcomes": -0.33,
+  "Inflation expectations": -0.76
+ },
+ "budget": [
+  {
+   "budget": 0.1,
+   "signal": "ML: Random forest",
+   "avg": 1.07,
+   "cvar": 13.94
+  },
+  {
+   "budget": 0.1,
+   "signal": "Implied volatility",
+   "avg": 0.52,
+   "cvar": 13.38
+  },
+  {
+   "budget": 0.1,
+   "signal": "Momentum (21d return)",
+   "avg": 0.46,
+   "cvar": 14.72
+  },
+  {
+   "budget": 0.1,
+   "signal": "Constant ratio",
+   "avg": 0.89,
+   "cvar": 15.12
+  },
+  {
+   "budget": 0.2,
+   "signal": "ML: Random forest",
+   "avg": 0.63,
+   "cvar": 11.38
+  },
+  {
+   "budget": 0.2,
+   "signal": "Implied volatility",
+   "avg": 0.48,
+   "cvar": 11.64
+  },
+  {
+   "budget": 0.2,
+   "signal": "Momentum (21d return)",
+   "avg": 0.37,
+   "cvar": 14.6
+  },
+  {
+   "budget": 0.2,
+   "signal": "Constant ratio",
+   "avg": 0.9,
+   "cvar": 13.55
+  },
+  {
+   "budget": 0.3,
+   "signal": "ML: Random forest",
+   "avg": 0.48,
+   "cvar": 8.91
+  },
+  {
+   "budget": 0.3,
+   "signal": "Implied volatility",
+   "avg": 0.42,
+   "cvar": 8.44
+  },
+  {
+   "budget": 0.3,
+   "signal": "Momentum (21d return)",
+   "avg": 0.68,
+   "cvar": 14.6
+  },
+  {
+   "budget": 0.3,
+   "signal": "Constant ratio",
+   "avg": 0.91,
+   "cvar": 11.99
+  },
+  {
+   "budget": 0.4,
+   "signal": "ML: Random forest",
+   "avg": 0.57,
+   "cvar": 8.91
+  },
+  {
+   "budget": 0.4,
+   "signal": "Implied volatility",
+   "avg": 0.49,
+   "cvar": 7.27
+  },
+  {
+   "budget": 0.4,
+   "signal": "Momentum (21d return)",
+   "avg": 0.62,
+   "cvar": 14.35
+  },
+  {
+   "budget": 0.4,
+   "signal": "Constant ratio",
+   "avg": 0.93,
+   "cvar": 10.42
+  },
+  {
+   "budget": 0.5,
+   "signal": "ML: Random forest",
+   "avg": 0.49,
+   "cvar": 8.15
+  },
+  {
+   "budget": 0.5,
+   "signal": "Implied volatility",
+   "avg": 0.43,
+   "cvar": 6.85
+  },
+  {
+   "budget": 0.5,
+   "signal": "Momentum (21d return)",
+   "avg": 0.57,
+   "cvar": 14.35
+  },
+  {
+   "budget": 0.5,
+   "signal": "Constant ratio",
+   "avg": 0.94,
+   "cvar": 8.85
+  },
+  {
+   "budget": 0.6,
+   "signal": "ML: Random forest",
+   "avg": 0.63,
+   "cvar": 6.3
+  },
+  {
+   "budget": 0.6,
+   "signal": "Implied volatility",
+   "avg": 0.5,
+   "cvar": 5.86
+  },
+  {
+   "budget": 0.6,
+   "signal": "Momentum (21d return)",
+   "avg": 0.78,
+   "cvar": 14.35
+  },
+  {
+   "budget": 0.6,
+   "signal": "Constant ratio",
+   "avg": 0.95,
+   "cvar": 7.28
+  },
+  {
+   "budget": 0.7,
+   "signal": "ML: Random forest",
+   "avg": 0.74,
+   "cvar": 4.98
+  },
+  {
+   "budget": 0.7,
+   "signal": "Implied volatility",
+   "avg": 0.61,
+   "cvar": 4.83
+  },
+  {
+   "budget": 0.7,
+   "signal": "Momentum (21d return)",
+   "avg": 0.72,
+   "cvar": 11.9
+  },
+  {
+   "budget": 0.7,
+   "signal": "Constant ratio",
+   "avg": 0.96,
+   "cvar": 5.71
+  },
+  {
+   "budget": 0.8,
+   "signal": "ML: Random forest",
+   "avg": 0.76,
+   "cvar": 4.32
+  },
+  {
+   "budget": 0.8,
+   "signal": "Implied volatility",
+   "avg": 0.67,
+   "cvar": 3.76
+  },
+  {
+   "budget": 0.8,
+   "signal": "Momentum (21d return)",
+   "avg": 0.82,
+   "cvar": 11.29
+  },
+  {
+   "budget": 0.8,
+   "signal": "Constant ratio",
+   "avg": 0.98,
+   "cvar": 4.14
+  },
+  {
+   "budget": 0.9,
+   "signal": "ML: Random forest",
+   "avg": 0.8,
+   "cvar": 2.43
+  },
+  {
+   "budget": 0.9,
+   "signal": "Implied volatility",
+   "avg": 0.88,
+   "cvar": 2.73
+  },
+  {
+   "budget": 0.9,
+   "signal": "Momentum (21d return)",
+   "avg": 0.94,
+   "cvar": 6.1
+  },
+  {
+   "budget": 0.9,
+   "signal": "Constant ratio",
+   "avg": 0.99,
+   "cvar": 2.57
+  }
+ ]
+}

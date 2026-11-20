@@ -1,0 +1,45 @@
+\section{Methods}\label{sec:methods}
+
+\paragraph{Learning problem.} Let $x_t\in\mathbb{R}^{57}$ be the features known at the close of day $t$.
+The main task is to estimate $\pi(x_t)=\Pr(S_t=1\mid x_t)$, the probability of a spike; the secondary
+task estimates the conditional mean premium $m(x_t)=\E[R_t\mid x_t]$. Both are supervised problems
+solved by empirical risk minimisation, $\hat f=\arg\min_{f\in\mathcal F}\frac1n\sum_t L(y_t,f(x_t))+\lambda\,\Omega(f)$,
+with the log loss $L=-[y\log f+(1-y)\log(1-f)]$ for the spike and the squared loss for the premium.
+The log loss is a \emph{strictly proper} scoring rule \citep{gneiting2007}: it is minimised in expectation
+only by the true probability, which is what the hedging rule needs (Appendix~\ref{app:theory}).
+The three model families below span the bias--variance trade-off: from a rigid linear model to flexible
+tree ensembles. Each is tuned on its own training window only (Section~\ref{sec:evaluation}).
+
+\paragraph{Regularised logistic and ridge regression (baseline).} The logistic model assumes the
+log-odds are \emph{linear and additive} in the standardised features,
+$\log\frac{\pi(x)}{1-\pi(x)}=\beta_0+x^\top\beta$, with an $L_2$ penalty $\frac{1}{2C}\lVert\beta\rVert^2$; ridge
+regression does the same for the premium with penalty $\alpha\lVert\beta\rVert^2$. The penalty shrinks
+coefficients towards zero, trading a little bias for a large reduction in variance, which matters here
+because many features are strongly correlated (returns over overlapping windows, several volatility
+measures). Assumptions: linearity in the log-odds, no interactions unless engineered, features on a common
+scale (hence standardisation, fitted on the training window only). It is the natural ``simple model'' a
+risk desk would build and the reference for the more flexible models.
+
+\paragraph{Random forest.} A forest averages $B=300$ classification (or regression) trees, each grown on a
+random half of the training rows with a random subset of $\sqrt{p}$ features considered at each split
+\citep{breiman2001}. A single tree partitions the feature space into rectangles and predicts the average
+outcome in each; it captures non-linearities and interactions (e.g.\ \emph{high volatility and backwardation})
+but has high variance. Averaging $B$ trees with pairwise correlation $\rho$ reduces the variance of the
+ensemble to $\rho\sigma^2+\frac{1-\rho}{B}\sigma^2$; random feature selection lowers $\rho$. Assumptions:
+none on functional form, but the forest cannot extrapolate beyond the range of the training data (a problem
+in 2022, see Section~\ref{sec:limits}). Tuned: maximum depth $\{3,6\}$ and minimum leaf size $\{25,100\}$,
+which control how finely the forest can fit the overlapping, autocorrelated daily labels.
+
+\paragraph{Gradient boosting.} Boosting builds an additive model $F_M(x)=\sum_{m=1}^M\nu\,h_m(x)$ of
+\emph{shallow} trees, each fitted to the negative gradient of the loss of the current model
+\citep{friedman2001}; for the log loss the gradient is simply $y-\hat\pi$, so each tree corrects the
+current probability errors. Where the forest reduces variance by averaging, boosting reduces bias step by
+step; it is controlled by the learning rate $\nu=0.05$, an $L_2$ penalty on leaf values, the number of trees
+$M\in\{100,300\}$ and the depth $\{2,3\}$ (depth $d$ allows interactions of order $d$). We use the
+histogram-based implementation of scikit-learn, which bins features as in LightGBM \citep{ke2017} and
+handles missing values natively.
+
+\paragraph{Why these choices.} The sample has 4\,700 daily rows but, because labels overlap over 21 days,
+only about 220 independent months. Grids are therefore deliberately small (4 configurations per model),
+trees shallow, and all models regularised. We did not use neural networks: with this effective sample size
+their extra flexibility would mostly add variance \citep{gu2020}.

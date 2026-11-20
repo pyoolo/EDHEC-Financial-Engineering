@@ -1,0 +1,56 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{natbib}
+\usepackage[hidelinks]{hyperref}
+\usepackage{float}
+\usepackage{adjustbox}
+\newcommand{\fittable}[1]{\begin{adjustbox}{max width=\textwidth}\input{#1}\end{adjustbox}}
+\captionsetup{font=small,labelfont=bf}
+\setlist{nosep,leftmargin=1.4em}
+\setlength{\parskip}{0.35em}
+\setlength{\parindent}{0pt}
+\graphicspath{{../results/figures/}}
+\newcommand{\tabdir}{../results/tables}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\1}{\mathbf{1}}
+
+\title{\textbf{FuelGuard}: machine-learning signals to hedge diesel costs\\
+for small Italian hauliers}
+\author{{[Member 1]} \quad {[Member 2]} \quad {[Member 3]} \quad {[Member 4]} \quad {[Member 5]}\\[0.4em]
+\small Introduction to Machine Learning -- Group project\\
+\small MSc in Financial Engineering, EDHEC Business School}
+\date{2 December 2026}
+
+\begin{document}
+\maketitle
+\input{sections/00_abstract}
+\input{sections/01_product}
+\input{sections/02_data}
+\input{sections/03_methods}
+\input{sections/04_evaluation}
+\input{sections/05_results}
+\input{sections/06_limits}
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\clearpage
+\appendix
+\input{sections/A_theory}
+\input{sections/B_data}
+\input{sections/C_additional}
+\input{sections/D_contribution}
+\input{sections/E_ai}
+\end{document}

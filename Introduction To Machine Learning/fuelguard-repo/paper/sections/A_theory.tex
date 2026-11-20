@@ -1,0 +1,71 @@
+\section{Machine-learning concepts used in the project}\label{app:theory}
+
+\paragraph{A.1 Bias--variance trade-off.} For squared loss and $y=f(x)+\varepsilon$, the expected test
+error of an estimator $\hat f$ trained on a random sample decomposes as
+\[\E\big[(y-\hat f(x))^2\big]=\underbrace{\big(f(x)-\E\hat f(x)\big)^2}_{\text{bias}^2}+
+\underbrace{\mathrm{Var}\big(\hat f(x)\big)}_{\text{variance}}+\sigma_\varepsilon^2 .\]
+Flexible models (deep trees) have low bias and high variance; rigid models (penalised linear) the
+opposite. The noise term $\sigma^2_\varepsilon$ is irreducible. In commodity markets it is very large
+relative to the predictable part, so variance control (regularisation, averaging, small grids) matters more
+than flexibility \citep[ch.~7]{hastie2009}.
+
+\paragraph{A.2 Regularisation.} Ridge and $L_2$-logistic regression add $\lambda\lVert\beta\rVert_2^2$ to
+the loss. In the linear case the solution $\hat\beta=(X^\top X+\lambda I)^{-1}X^\top y$ shrinks the
+coefficients along the principal components of $X$, most strongly along low-variance directions, which
+stabilises estimates when features are collinear. The penalty is not scale-invariant, so features are
+standardised, using means and variances of the training window only.
+
+\paragraph{A.3 Decision trees, bagging and random forests.} A CART tree chooses, at each node, the
+feature and threshold that most reduce impurity (Gini or entropy for classification, squared error for
+regression) and predicts the average outcome in each leaf. Trees are invariant to monotone transformations
+of features and model interactions automatically, but small changes in the data change the tree a lot.
+Bagging \citep{breiman1996} averages trees fitted on bootstrap samples; if each tree has variance $\sigma^2$
+and pairwise correlation $\rho$, the average of $B$ trees has variance
+$\rho\sigma^2+(1-\rho)\sigma^2/B$. As $B$ grows only $\rho\sigma^2$ remains, so random forests also
+sample a subset of features at each split to decorrelate the trees \citep{breiman2001}. Because our labels
+overlap in time, bootstrap samples contain near-duplicate rows; we subsample 50\% of rows per tree and use
+large minimum leaf sizes to limit this (a ``sequential bootstrap'' as in \citealp{lopezdeprado2018} would
+be a refinement).
+
+\paragraph{A.4 Gradient boosting.} Boosting minimises $\sum_t L(y_t,F(x_t))$ by functional gradient
+descent: starting from a constant $F_0$, at step $m$ compute pseudo-residuals
+$r_{tm}=-\partial L(y_t,F)/\partial F|_{F=F_{m-1}(x_t)}$, fit a small regression tree $h_m$ to them, and update
+$F_m=F_{m-1}+\nu h_m$ \citep{friedman2001}. For the log loss on the log-odds scale, $r_{tm}=y_t-\hat\pi_{m-1}(x_t)$.
+A small learning rate $\nu$ with more trees acts as regularisation (shrinkage); the depth of the trees
+bounds the order of interactions.
+
+\paragraph{A.5 Proper scoring rules and probability evaluation.} A scoring rule $S(p,y)$ is strictly
+proper if $\E_{y\sim q}S(p,y)$ is uniquely optimised at $p=q$ \citep{gneiting2007}. The log loss and the
+Brier score $(p-y)^2$ are both strictly proper, so they reward honest probabilities; accuracy is not.
+The Brier skill score $1-\mathrm{BS}/\mathrm{BS}_{\text{ref}}$ compares a model with the climatological
+forecast (the training base rate): positive values mean the model adds information. The ROC AUC equals the
+probability that a randomly chosen spike day receives a higher score than a randomly chosen non-spike day
+\citep{fawcett2006}; it measures ranking (discrimination) and ignores calibration, which is shown
+separately with a reliability diagram.
+
+\paragraph{A.6 Cross-validation for overlapping financial labels.} Standard $K$-fold CV assumes
+independent observations. With time series, a random split puts tomorrow's data in the training set and
+yesterday's in the validation set; with \emph{overlapping} labels (each label uses the next 22 days) even a
+chronological split leaks, because the last training labels are computed from prices inside the validation
+period. \emph{Purging} removes every training row whose label window ends after the validation period
+starts; an \emph{embargo} removes a further block of rows, because features are also autocorrelated
+\citep[ch.~7]{lopezdeprado2018}. We apply both in the outer walk-forward loop and in the inner
+cross-validation used to tune hyper-parameters, and test them automatically (\texttt{tests/test\_leakage.py}).
+
+\paragraph{A.7 Permutation importance.} The importance of feature $j$ is the drop in out-of-sample
+performance (here AUC) when column $j$ of the test set is randomly permuted, which breaks its link with the
+target while keeping its distribution \citep{fisher2019}. Unlike impurity-based importance it is computed
+on test data and is not biased towards high-cardinality features \citep{strobl2007}. With correlated
+features it understates the importance of each member of a correlated group, so we also report importance
+summed by group.
+
+\paragraph{A.8 Diebold--Mariano test.} To compare two forecasts with errors $e_{1t},e_{2t}$, define
+$d_t=e_{1t}^2-e_{2t}^2$. Under the null of equal accuracy $\E d_t=0$, and
+$\mathrm{DM}=\bar d/\sqrt{\widehat{\mathrm{LRV}}(d)/n}\to\mathcal N(0,1)$ \citep{diebold1995}. Daily forecasts of a
+21-day average are autocorrelated by construction, so the long-run variance uses a Newey--West estimator
+with 21 lags \citep{newey1987}.
+
+\paragraph{A.9 Conditional Value-at-Risk.} For a loss $X$, $\mathrm{CVaR}_{95}(X)=\E[X\mid X\ge
+\mathrm{VaR}_{95}(X)]$, the average of the worst 5\% outcomes \citep{rockafellar2000}. Unlike variance, it
+only penalises bad outcomes, which matches the haulier's concern: months when diesel costs far more than
+the price that could have been locked.

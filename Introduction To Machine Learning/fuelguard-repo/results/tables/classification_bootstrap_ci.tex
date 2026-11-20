@@ -1,0 +1,10 @@
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & AUC low & AUC high & P(AUC<=0.5) & BSS low & BSS high & P(BSS<=0) \\
+\midrule
+Logistic (implied vol only) & 0.640 & 0.735 & 0.000 & 0.015 & 0.087 & 0.009 \\
+Logistic (L2) & 0.538 & 0.639 & 0.003 & -0.026 & 0.032 & 0.400 \\
+Random forest & 0.587 & 0.694 & 0.000 & 0.015 & 0.066 & 0.005 \\
+Gradient boosting & 0.564 & 0.665 & 0.000 & -0.044 & 0.032 & 0.582 \\
+\bottomrule
+\end{tabular}

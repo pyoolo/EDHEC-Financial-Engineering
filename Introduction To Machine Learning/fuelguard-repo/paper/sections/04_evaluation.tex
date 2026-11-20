@@ -1,0 +1,36 @@
+\section{Evaluation design}\label{sec:evaluation}
+
+\paragraph{Walk-forward with purging and embargo.} Observations are ordered in time and labels overlap,
+so we never shuffle. We use an \textbf{expanding window}: for each test year $Y=2012,\dots,2026$ the models
+are trained on all days whose label is fully known before 1 January of $Y$, minus a further 21-day embargo,
+and then predict every day of $Y$ (Figure~\ref{fig:wf}). This gives 15 independent test years and
+\textbf{3\,700+ out-of-sample days} that include rising and falling markets, two crashes (2014--16, 2020) and
+two spikes (2021--22, 2026). Inside each training window, hyper-parameters are chosen by a three-fold
+\emph{purged} time-series cross-validation (the three most recent 15\% blocks of the window), minimising
+log loss (classification) or mean squared error (regression). The test year is never seen during tuning.
+Leakage controls are tested automatically (Appendix~\ref{app:theory}, A.6).
+
+\begin{figure}[t]
+\centering\includegraphics[width=\textwidth]{fig2_walk_forward.pdf}
+\caption{Walk-forward design. Each year the models are re-tuned and re-fitted on all past data, leaving a
+gap (purge of 23 days so that every training label is known, plus a 21-day embargo) before the test year.}
+\label{fig:wf}
+\end{figure}
+
+\paragraph{Statistical metrics.} For the spike probability: ROC AUC (ranking), Brier score and Brier skill
+score against climatology, log loss, and a reliability diagram (calibration). We also report precision and
+recall of the ``elevated risk'' flag (probability above the base rate). For the premium: RMSE, MAE and the
+out-of-sample $R^2$ against the futures benchmark, $R^2_{OS}=1-\sum(R_t-\hat R_t)^2/\sum R_t^2$
+\citep{campbell2008}, with a Diebold--Mariano test using Newey--West standard errors (21 lags).
+
+\paragraph{Economic metric: the hedging backtest.} On the first trading day of each test month the haulier
+applies a rule fixed in advance and pays, per litre,
+\[c_t=h_t\,P_t\,(1+k)+(1-h_t)\,M_t ,\qquad k=1\%\ \text{(supplier margin)} .\]
+FuelGuard's rule uses only the predicted spike probability $\hat\pi_t$ and the training base rate
+$\bar\pi$: $h_t=1$ if $\hat\pi_t>2\bar\pi$, $h_t=\tfrac12$ if $\bar\pi<\hat\pi_t\le2\bar\pi$, $h_t=0$ otherwise.
+A regression rule locks fully when the predicted premium exceeds the margin $k$. To remove the effect of
+the price level (0.3 to 1.1 EUR/l), we evaluate the \textbf{overrun} $c_t/P_t-1$: what the firm paid above
+the price it could have locked. We report its mean (the average cost of the strategy), its standard
+deviation, its CVaR at 95\% (the average of the worst 5\% of months) and the number of months with an
+overrun above 5\%, and we convert average savings into euros per year for a firm buying 25\,000 litres a
+month. Results for $k=0\%$ and $2\%$ are in Appendix~\ref{app:additional}.

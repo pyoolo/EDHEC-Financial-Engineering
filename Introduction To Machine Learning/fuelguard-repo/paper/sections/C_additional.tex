@@ -1,0 +1,28 @@
+\section{Additional results}\label{app:additional}
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/classification_bootstrap_ci.tex}
+\caption{90\% confidence intervals for AUC and Brier skill score (BSS), from 2\,000 block-bootstrap samples
+of whole calendar months; $P(\cdot)$ is the share of bootstrap samples with no skill.}
+\end{table}
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/backtest_sensitivity.tex}
+\caption{Sensitivity of the backtest to the hedging margin $k$ (average overrun, \%). The ranking of rules is
+unchanged; the CVaR barely depends on $k$.}
+\end{table}
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/hyperparameters_mode.tex}
+\caption{Most frequent hyper-parameters chosen by purged cross-validation across the 15 training windows.
+The linear models always choose the strongest penalty: the data support only a small signal.}
+\end{table}
+
+\begin{figure}[H]
+\centering\includegraphics[width=0.9\textwidth]{fig7_cumulative.pdf}
+\caption{Cumulative saving versus never hedging for a firm using 25\,000 litres a month (hedge cost 1\%).
+Hedging costs money in calm or falling markets (2014--2020) and pays off in the 2022 and 2026 spikes.}
+\end{figure}

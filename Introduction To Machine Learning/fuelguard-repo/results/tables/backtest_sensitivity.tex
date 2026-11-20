@@ -1,0 +1,16 @@
+\begin{tabular}{lrrrr}
+\toprule
+Strategy (avg overrun, \%) & Avg overrun, cost 0\% & Avg overrun, cost 1\% & Avg overrun, cost 2\% & CVaR95, cost 1\% \\
+\midrule
+Never lock (market) & 0.88 & 0.88 & 0.88 & 16.69 \\
+Always lock & 0.00 & 1.00 & 2.00 & 1.00 \\
+Always 50\% & 0.44 & 0.94 & 1.44 & 8.85 \\
+Momentum rule & 0.10 & 0.63 & 1.17 & 14.35 \\
+Volatility rule & -0.02 & 0.49 & 1.01 & 6.85 \\
+ML: Logistic (implied vol only) & 0.42 & 0.62 & 0.83 & 9.52 \\
+ML: Logistic (L2) & 0.45 & 0.65 & 0.86 & 10.65 \\
+ML: Random forest & 0.57 & 0.82 & 1.08 & 9.40 \\
+ML: Gradient boosting & 0.53 & 0.75 & 0.96 & 11.26 \\
+ML: regression (GB) & 0.65 & 0.95 & 1.25 & 14.19 \\
+\bottomrule
+\end{tabular}

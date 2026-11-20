@@ -1,0 +1,106 @@
+year,task,model,params,cv_score,n_train,n_test,train_start,train_end
+2012,clf,Logistic (implied vol only),{'logisticregression__C': 1.0},-0.3878220456534398,933,252,2008-01-02,2011-10-28
+2012,clf,Logistic (L2),{'logisticregression__C': 0.01},-0.37155902769783755,933,252,2008-01-02,2011-10-28
+2012,clf,Random forest,"{'max_depth': 6, 'min_samples_leaf': 25}",-0.387025962477185,933,252,2008-01-02,2011-10-28
+2012,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.3653014280388409,933,252,2008-01-02,2011-10-28
+2012,reg,Ridge,{'ridge__alpha': 10000.0},-0.0013654833621642075,933,252,2008-01-02,2011-10-28
+2012,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0013554722985625808,933,252,2008-01-02,2011-10-28
+2012,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.0018843212429106254,933,252,2008-01-02,2011-10-28
+2013,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.3577886137361482,1185,252,2008-01-02,2012-10-29
+2013,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.36805598408239576,1185,252,2008-01-02,2012-10-29
+2013,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.36969105234408417,1185,252,2008-01-02,2012-10-29
+2013,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.4123437859988812,1185,252,2008-01-02,2012-10-29
+2013,reg,Ridge,{'ridge__alpha': 10000.0},-0.0013400753022627405,1185,252,2008-01-02,2012-10-29
+2013,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0013863061895270626,1185,252,2008-01-02,2012-10-29
+2013,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.001838789777733294,1185,252,2008-01-02,2012-10-29
+2014,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.26495660513462865,1437,252,2008-01-02,2013-10-29
+2014,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.29100356044116804,1437,252,2008-01-02,2013-10-29
+2014,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.28688432684100146,1437,252,2008-01-02,2013-10-29
+2014,clf,Gradient boosting,"{'max_depth': 3, 'max_iter': 100}",-0.27878194026313813,1437,252,2008-01-02,2013-10-29
+2014,reg,Ridge,{'ridge__alpha': 10000.0},-0.0012495147005450568,1437,252,2008-01-02,2013-10-29
+2014,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0012557581850099928,1437,252,2008-01-02,2013-10-29
+2014,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.0015407150093992659,1437,252,2008-01-02,2013-10-29
+2015,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.1935617305161712,1689,252,2008-01-02,2014-10-29
+2015,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.22837382808029968,1689,252,2008-01-02,2014-10-29
+2015,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.2196560763932638,1689,252,2008-01-02,2014-10-29
+2015,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.207797187830737,1689,252,2008-01-02,2014-10-29
+2015,reg,Ridge,{'ridge__alpha': 10000.0},-0.0009370986944029643,1689,252,2008-01-02,2014-10-29
+2015,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0009327813734054377,1689,252,2008-01-02,2014-10-29
+2015,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.001083885753659626,1689,252,2008-01-02,2014-10-29
+2016,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.24156816310331405,1941,252,2008-01-02,2015-10-29
+2016,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.2789462292284673,1941,252,2008-01-02,2015-10-29
+2016,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.25806840195671904,1941,252,2008-01-02,2015-10-29
+2016,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.2390523999703389,1941,252,2008-01-02,2015-10-29
+2016,reg,Ridge,{'ridge__alpha': 10000.0},-0.0017754386720983714,1941,252,2008-01-02,2015-10-29
+2016,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0017791697003624412,1941,252,2008-01-02,2015-10-29
+2016,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.00222754274204515,1941,252,2008-01-02,2015-10-29
+2017,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.31676189412664923,2193,251,2008-01-02,2016-10-28
+2017,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.3533536398185498,2193,251,2008-01-02,2016-10-28
+2017,clf,Random forest,"{'max_depth': 6, 'min_samples_leaf': 100}",-0.33447554997783485,2193,251,2008-01-02,2016-10-28
+2017,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.35359953561375734,2193,251,2008-01-02,2016-10-28
+2017,reg,Ridge,{'ridge__alpha': 10000.0},-0.0027619353873561954,2193,251,2008-01-02,2016-10-28
+2017,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0027806532269531964,2193,251,2008-01-02,2016-10-28
+2017,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.0029490930411281923,2193,251,2008-01-02,2016-10-28
+2018,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.3950281300256722,2444,252,2008-01-02,2017-10-27
+2018,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.4242981882883208,2444,252,2008-01-02,2017-10-27
+2018,clf,Random forest,"{'max_depth': 6, 'min_samples_leaf': 100}",-0.4014695296714059,2444,252,2008-01-02,2017-10-27
+2018,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.45024667606283497,2444,252,2008-01-02,2017-10-27
+2018,reg,Ridge,{'ridge__alpha': 10000.0},-0.002962544855785301,2444,252,2008-01-02,2017-10-27
+2018,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0029694727842882423,2444,252,2008-01-02,2017-10-27
+2018,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.003575098596271539,2444,252,2008-01-02,2017-10-27
+2019,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.42057556942967905,2696,252,2008-01-02,2018-10-29
+2019,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.4310361894193136,2696,252,2008-01-02,2018-10-29
+2019,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.4240483500486432,2696,252,2008-01-02,2018-10-29
+2019,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.46789600709387713,2696,252,2008-01-02,2018-10-29
+2019,reg,Ridge,{'ridge__alpha': 10000.0},-0.0028571058434955633,2696,252,2008-01-02,2018-10-29
+2019,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.0028562970739801964,2696,252,2008-01-02,2018-10-29
+2019,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.0031344463978143946,2696,252,2008-01-02,2018-10-29
+2020,clf,Logistic (implied vol only),{'logisticregression__C': 100.0},-0.4325166764789971,2948,253,2008-01-02,2019-10-29
+2020,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.44850794822611073,2948,253,2008-01-02,2019-10-29
+2020,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.4371099525175193,2948,253,2008-01-02,2019-10-29
+2020,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.4858179366823416,2948,253,2008-01-02,2019-10-29
+2020,reg,Ridge,{'ridge__alpha': 10000.0},-0.002975921565088219,2948,253,2008-01-02,2019-10-29
+2020,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.003006142932066332,2948,253,2008-01-02,2019-10-29
+2020,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.003527304981715156,2948,253,2008-01-02,2019-10-29
+2021,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.42524756116643925,3201,253,2008-01-02,2020-10-29
+2021,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.442350460439729,3201,253,2008-01-02,2020-10-29
+2021,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.433901485167629,3201,253,2008-01-02,2020-10-29
+2021,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.49167509113360425,3201,253,2008-01-02,2020-10-29
+2021,reg,Ridge,{'ridge__alpha': 10000.0},-0.003830419872741675,3201,253,2008-01-02,2020-10-29
+2021,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.003829470840743178,3201,253,2008-01-02,2020-10-29
+2021,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.003969671976692829,3201,253,2008-01-02,2020-10-29
+2022,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.47954702122292253,3454,251,2008-01-02,2021-10-29
+2022,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.49464719456468353,3454,251,2008-01-02,2021-10-29
+2022,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.48571880660124506,3454,251,2008-01-02,2021-10-29
+2022,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.5310920940253036,3454,251,2008-01-02,2021-10-29
+2022,reg,Ridge,{'ridge__alpha': 10000.0},-0.003755262024776381,3454,251,2008-01-02,2021-10-29
+2022,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.0037705474067395335,3454,251,2008-01-02,2021-10-29
+2022,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.0038076361146181566,3454,251,2008-01-02,2021-10-29
+2023,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.555953686077093,3705,251,2008-01-02,2022-10-28
+2023,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.5978652950927775,3705,251,2008-01-02,2022-10-28
+2023,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.5677118878389898,3705,251,2008-01-02,2022-10-28
+2023,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.6289516774887788,3705,251,2008-01-02,2022-10-28
+2023,reg,Ridge,{'ridge__alpha': 10000.0},-0.004846370957749654,3705,251,2008-01-02,2022-10-28
+2023,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.00475488504579082,3705,251,2008-01-02,2022-10-28
+2023,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.00500805488627536,3705,251,2008-01-02,2022-10-28
+2024,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.5344175725138102,3956,252,2008-01-02,2023-10-27
+2024,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.5685228583723552,3956,252,2008-01-02,2023-10-27
+2024,clf,Random forest,"{'max_depth': 6, 'min_samples_leaf': 100}",-0.5478403827548514,3956,252,2008-01-02,2023-10-27
+2024,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.5930518617688235,3956,252,2008-01-02,2023-10-27
+2024,reg,Ridge,{'ridge__alpha': 10000.0},-0.004705936016242623,3956,252,2008-01-02,2023-10-27
+2024,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.004619863558123966,3956,252,2008-01-02,2023-10-27
+2024,reg,Gradient boosting,"{'max_depth': 3, 'max_iter': 100}",-0.004695526409815006,3956,252,2008-01-02,2023-10-27
+2025,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.5129021019267181,4208,251,2008-01-02,2024-10-29
+2025,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.543388445179846,4208,251,2008-01-02,2024-10-29
+2025,clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100}",-0.5336253026388288,4208,251,2008-01-02,2024-10-29
+2025,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.5661715525510588,4208,251,2008-01-02,2024-10-29
+2025,reg,Ridge,{'ridge__alpha': 10000.0},-0.0044662758401818,4208,251,2008-01-02,2024-10-29
+2025,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.004492384937981517,4208,251,2008-01-02,2024-10-29
+2025,reg,Gradient boosting,"{'max_depth': 3, 'max_iter': 100}",-0.004845014323328631,4208,251,2008-01-02,2024-10-29
+2026,clf,Logistic (implied vol only),{'logisticregression__C': 0.01},-0.5169452926265238,4459,199,2008-01-02,2025-10-29
+2026,clf,Logistic (L2),{'logisticregression__C': 0.001},-0.5478952067219368,4459,199,2008-01-02,2025-10-29
+2026,clf,Random forest,"{'max_depth': 6, 'min_samples_leaf': 25}",-0.5315071605604974,4459,199,2008-01-02,2025-10-29
+2026,clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.5709301518875516,4459,199,2008-01-02,2025-10-29
+2026,reg,Ridge,{'ridge__alpha': 10000.0},-0.004445441428572356,4459,199,2008-01-02,2025-10-29
+2026,reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25}",-0.004407445929040861,4459,199,2008-01-02,2025-10-29
+2026,reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100}",-0.004563915420511686,4459,199,2008-01-02,2025-10-29

@@ -1,0 +1,13 @@
+\begin{tabular}{lll}
+\toprule
+Task & model & params \\
+\midrule
+Spike (classif.) & Gradient boosting & max\_depth: 2, max\_iter: 100 (14/15 years) \\
+Spike (classif.) & Logistic (L2) & C: 0.001 (14/15 years) \\
+Spike (classif.) & Logistic (implied vol only) & C: 100.0 (8/15 years) \\
+Spike (classif.) & Random forest & max\_depth: 3, min\_samples\_leaf: 25 (5/15 years) \\
+Premium (regr.) & Gradient boosting & max\_depth: 2, max\_iter: 100 (13/15 years) \\
+Premium (regr.) & Random forest & max\_depth: 3, min\_samples\_leaf: 100 (10/15 years) \\
+Premium (regr.) & Ridge & alpha: 10000.0 (15/15 years) \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,37 @@
+\section{Limits and what we cannot claim}\label{sec:limits}
+
+\begin{itemize}
+\item \textbf{We cannot claim to beat the market on price.} Next month's diesel cost is not predictable
+beyond the futures price; the product reduces \emph{risk}, not the expected cost.
+\item \textbf{We cannot claim that machine learning beats a simple rule.} Our 57-feature models have
+significant but modest skill and are matched or beaten by implied volatility alone. The honest product is a
+parsimonious, volatility-driven risk score; complex models are challengers to monitor.
+\item \textbf{Shocks that start from calm markets are not anticipated} (2023, 2026). No model trained on
+past prices can foresee a geopolitical or supply shock; the signal reacts after the first move.
+\item \textbf{Data and contract mismatch.} We use US diesel futures (NY Harbor ULSD), not ICE Gasoil, and
+wholesale prices: excise duties and VAT (more than half of the pump price in Italy) are not hedged, and the
+basis between the haulier's supplier price and the futures is ignored. The 1\% hedging margin is an
+assumption; results are robust between 0\% and 2\%.
+\item \textbf{Small effective sample.} 4\,700 daily rows are only about 220 independent months and 178
+backtest decisions; the CVaR rests on the 9 worst months. Differences of one or two percentage points
+between rules are within sampling noise.
+\item \textbf{Post-hoc elements.} The parsimonious model and the equal-budget diagnostic were added after
+seeing the first results (Section~\ref{sec:results}); a fresh out-of-sample period is needed to confirm
+them.
+\end{itemize}
+
+\paragraph{With more time.} (i) Replace HO with ICE Gasoil and a real supplier price series; (ii) learn the
+decision rule itself, by choosing the hedge thresholds that minimise a cost--CVaR objective in the
+validation folds rather than fixing them ex ante; (iii) predict upside volatility directly (quantile
+regression of the premium); (iv) add fundamentals (distillate inventories, refinery outages, freight
+indices) and news-based shock indicators; (v) use a sequential bootstrap for the forest
+\citep{lopezdeprado2018}.
+
+\section{Conclusion}
+
+FuelGuard turns a weak but real predictive signal into a simple monthly instruction for a small haulier.
+Over 2012--2026, out of sample, conditioning the hedge on market risk roughly halves the cost of the worst
+months compared with never hedging, at a lower average cost than a fixed hedging policy. The most useful
+lesson of the project is a machine-learning one: with a low signal-to-noise target, regularisation,
+parsimony and an honest benchmark matter more than model complexity, and the decision rule built on top of a
+probability matters as much as the probability itself.

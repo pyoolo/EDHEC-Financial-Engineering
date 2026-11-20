@@ -1,0 +1,8 @@
+task,model,params
+clf,Gradient boosting,"{'max_depth': 2, 'max_iter': 100} (14/15 years)"
+clf,Logistic (L2),{'logisticregression__C': 0.001} (14/15 years)
+clf,Logistic (implied vol only),{'logisticregression__C': 100.0} (8/15 years)
+clf,Random forest,"{'max_depth': 3, 'min_samples_leaf': 25} (5/15 years)"
+reg,Gradient boosting,"{'max_depth': 2, 'max_iter': 100} (13/15 years)"
+reg,Random forest,"{'max_depth': 3, 'min_samples_leaf': 100} (10/15 years)"
+reg,Ridge,{'ridge__alpha': 10000.0} (15/15 years)

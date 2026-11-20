@@ -1,0 +1,31 @@
+\section{Use of AI tools}\label{app:ai}
+
+\emph{The group should complete this section with its own account; the draft below describes how the
+AI assistant was used to produce the first version of the repository and report.}
+
+\paragraph{Tool.} Claude (Anthropic), used through the Claude app.
+
+\paragraph{Tasks.}
+\begin{itemize}
+\item \textbf{Brainstorming the product}: from an initial idea on electricity costs for Italian SMEs to
+the final diesel-hedging product, choice of client (bank) and benchmark.
+\item \textbf{Data}: list of Bloomberg tickers and fields; parsing of the Bloomberg Excel exports and of
+the ECB SDMX file.
+\item \textbf{Code}: first version of the full pipeline (\texttt{src/fuelguard}, \texttt{scripts/}),
+including the purged walk-forward evaluation and the leakage tests.
+\item \textbf{Report}: first draft of the text, figures and tables, including Appendix~\ref{app:theory}.
+\end{itemize}
+
+\paragraph{Main prompts (abridged).} ``Which data can we use to build a small university project to
+automate hedging of energy costs for SMEs in Italy with machine learning?''; ``Can we simplify it using oil?
+Focus on a specific subtopic: what are we selling?''; ``Are these Bloomberg files enough to do a first
+analysis?''; ``Which directions do you propose if results are not good?''; ``Build a full GitHub repository
+with a paper, fully analysed, including the theoretical concepts of machine learning.''
+
+\paragraph{How we checked the outputs.} [To be completed by the group, e.g.:] we reran the full pipeline
+from a clean copy; checked the leakage tests and added a deliberately leaky feature to verify that the test
+fails; compared yearly average prices with published figures; recomputed key numbers of Section~\ref{sec:results}
+from the saved predictions; checked every reference; and rewrote the sections we present.
+A notable correction found during the work: a first analysis compared futures of different delivery months
+and overstated the benefit of always locking; the final target uses a same-contract strip
+(Section~\ref{sec:data}).
