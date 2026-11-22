@@ -1,0 +1,486 @@
+{
+ "pooled": {
+  "Random walk": {
+   "MSE": 0.0843,
+   "QLIKE": 0.2171,
+   "R2 vs RW (%)": 0.0,
+   "R2 vs HAR-IV (%)": -54.7652,
+   "R2 (%)": 94.2387,
+   "DM vs HAR-IV": 14.2105,
+   "p-value": 0.0
+  },
+  "HAR": {
+   "MSE": 0.0715,
+   "QLIKE": 0.1815,
+   "R2 vs RW (%)": 15.1993,
+   "R2 vs HAR-IV (%)": -31.242,
+   "R2 (%)": 95.1144,
+   "DM vs HAR-IV": 14.9808,
+   "p-value": 0.0
+  },
+  "HAR-IV": {
+   "MSE": 0.0545,
+   "QLIKE": 0.1396,
+   "R2 vs RW (%)": 35.386,
+   "R2 vs HAR-IV (%)": 0.0,
+   "R2 (%)": 96.2774,
+   "DM vs HAR-IV": NaN,
+   "p-value": NaN
+  },
+  "Lasso": {
+   "MSE": 0.0554,
+   "QLIKE": 0.1442,
+   "R2 vs RW (%)": 34.347,
+   "R2 vs HAR-IV (%)": -1.608,
+   "R2 (%)": 96.2175,
+   "DM vs HAR-IV": 1.4315,
+   "p-value": 0.1523
+  },
+  "Random forest": {
+   "MSE": 0.0554,
+   "QLIKE": 0.1457,
+   "R2 vs RW (%)": 34.3537,
+   "R2 vs HAR-IV (%)": -1.5975,
+   "R2 (%)": 96.2179,
+   "DM vs HAR-IV": 1.5234,
+   "p-value": 0.1276
+  },
+  "Gradient boosting": {
+   "MSE": 0.0558,
+   "QLIKE": 0.1475,
+   "R2 vs RW (%)": 33.8562,
+   "R2 vs HAR-IV (%)": -2.3676,
+   "R2 (%)": 96.1893,
+   "DM vs HAR-IV": 1.9242,
+   "p-value": 0.0543
+  },
+  "Neural network": {
+   "MSE": 0.0716,
+   "QLIKE": 0.1822,
+   "R2 vs RW (%)": 15.1552,
+   "R2 vs HAR-IV (%)": -31.3102,
+   "R2 (%)": 95.1119,
+   "DM vs HAR-IV": 12.387,
+   "p-value": 0.0
+  },
+  "ML ensemble": {
+   "MSE": 0.0546,
+   "QLIKE": 0.1435,
+   "R2 vs RW (%)": 35.2867,
+   "R2 vs HAR-IV (%)": -0.1536,
+   "R2 (%)": 96.2717,
+   "DM vs HAR-IV": 0.1412,
+   "p-value": 0.8877
+  },
+  "FuelGuard (HAR-IV + ML)": {
+   "MSE": 0.0532,
+   "QLIKE": 0.1386,
+   "R2 vs RW (%)": 36.8729,
+   "R2 vs HAR-IV (%)": 2.3012,
+   "R2 (%)": 96.3631,
+   "DM vs HAR-IV": -4.7658,
+   "p-value": 0.0
+  }
+ },
+ "diesel": {
+  "Random walk": {
+   "MSE": 0.0684,
+   "QLIKE": 0.1822,
+   "R2 vs RW (%)": 0.0,
+   "R2 vs HAR-IV (%)": -31.4016,
+   "R2 (%)": 65.3124,
+   "DM vs HAR-IV": 5.1175,
+   "p-value": 0.0
+  },
+  "HAR": {
+   "MSE": 0.0589,
+   "QLIKE": 0.1706,
+   "R2 vs RW (%)": 13.954,
+   "R2 vs HAR-IV (%)": -13.0657,
+   "R2 (%)": 70.1527,
+   "DM vs HAR-IV": 4.8016,
+   "p-value": 0.0
+  },
+  "HAR-IV": {
+   "MSE": 0.0521,
+   "QLIKE": 0.1581,
+   "R2 vs RW (%)": 23.8974,
+   "R2 vs HAR-IV (%)": 0.0,
+   "R2 (%)": 73.6018,
+   "DM vs HAR-IV": NaN,
+   "p-value": NaN
+  },
+  "Lasso": {
+   "MSE": 0.0528,
+   "QLIKE": 0.1645,
+   "R2 vs RW (%)": 22.8663,
+   "R2 vs HAR-IV (%)": -1.3549,
+   "R2 (%)": 73.2442,
+   "DM vs HAR-IV": 0.6108,
+   "p-value": 0.5413
+  },
+  "Random forest": {
+   "MSE": 0.0525,
+   "QLIKE": 0.1602,
+   "R2 vs RW (%)": 23.2779,
+   "R2 vs HAR-IV (%)": -0.8141,
+   "R2 (%)": 73.3869,
+   "DM vs HAR-IV": 0.4603,
+   "p-value": 0.6453
+  },
+  "Gradient boosting": {
+   "MSE": 0.0541,
+   "QLIKE": 0.1614,
+   "R2 vs RW (%)": 20.9567,
+   "R2 vs HAR-IV (%)": -3.8641,
+   "R2 (%)": 72.5818,
+   "DM vs HAR-IV": 1.5613,
+   "p-value": 0.1184
+  },
+  "Neural network": {
+   "MSE": 0.0685,
+   "QLIKE": 0.2072,
+   "R2 vs RW (%)": -0.1463,
+   "R2 vs HAR-IV (%)": -31.5938,
+   "R2 (%)": 65.2617,
+   "DM vs HAR-IV": 4.6613,
+   "p-value": 0.0
+  },
+  "ML ensemble": {
+   "MSE": 0.0523,
+   "QLIKE": 0.159,
+   "R2 vs RW (%)": 23.5273,
+   "R2 vs HAR-IV (%)": -0.4863,
+   "R2 (%)": 73.4735,
+   "DM vs HAR-IV": 0.2857,
+   "p-value": 0.7751
+  },
+  "FuelGuard (HAR-IV + ML)": {
+   "MSE": 0.0517,
+   "QLIKE": 0.1573,
+   "R2 vs RW (%)": 24.4367,
+   "R2 vs HAR-IV (%)": 0.7087,
+   "R2 (%)": 73.7889,
+   "DM vs HAR-IV": -0.8584,
+   "p-value": 0.3907
+  }
+ },
+ "energy": {
+  "Random walk": {
+   "MSE": 0.0747,
+   "QLIKE": 0.2022,
+   "R2 vs RW (%)": 0.0,
+   "R2 vs HAR-IV (%)": -38.4431,
+   "R2 (%)": 65.8856,
+   "DM vs HAR-IV": 5.7809,
+   "p-value": 0.0
+  },
+  "HAR": {
+   "MSE": 0.0621,
+   "QLIKE": 0.1831,
+   "R2 vs RW (%)": 16.8498,
+   "R2 vs HAR-IV (%)": -15.1158,
+   "R2 (%)": 71.6338,
+   "DM vs HAR-IV": 6.3033,
+   "p-value": 0.0
+  },
+  "HAR-IV": {
+   "MSE": 0.054,
+   "QLIKE": 0.1632,
+   "R2 vs RW (%)": 27.7682,
+   "R2 vs HAR-IV (%)": 0.0,
+   "R2 (%)": 75.3586,
+   "DM vs HAR-IV": NaN,
+   "p-value": NaN
+  },
+  "Lasso": {
+   "MSE": 0.055,
+   "QLIKE": 0.1665,
+   "R2 vs RW (%)": 26.4378,
+   "R2 vs HAR-IV (%)": -1.8418,
+   "R2 (%)": 74.9047,
+   "DM vs HAR-IV": 0.8469,
+   "p-value": 0.397
+  },
+  "Random forest": {
+   "MSE": 0.0553,
+   "QLIKE": 0.169,
+   "R2 vs RW (%)": 26.0223,
+   "R2 vs HAR-IV (%)": -2.417,
+   "R2 (%)": 74.763,
+   "DM vs HAR-IV": 1.2427,
+   "p-value": 0.214
+  },
+  "Gradient boosting": {
+   "MSE": 0.0562,
+   "QLIKE": 0.1678,
+   "R2 vs RW (%)": 24.8363,
+   "R2 vs HAR-IV (%)": -4.0591,
+   "R2 (%)": 74.3583,
+   "DM vs HAR-IV": 1.5255,
+   "p-value": 0.1271
+  },
+  "Neural network": {
+   "MSE": 0.0692,
+   "QLIKE": 0.2028,
+   "R2 vs RW (%)": 7.4526,
+   "R2 vs HAR-IV (%)": -28.1255,
+   "R2 (%)": 68.428,
+   "DM vs HAR-IV": 5.0383,
+   "p-value": 0.0
+  },
+  "ML ensemble": {
+   "MSE": 0.0545,
+   "QLIKE": 0.1653,
+   "R2 vs RW (%)": 27.0232,
+   "R2 vs HAR-IV (%)": -1.0313,
+   "R2 (%)": 75.1044,
+   "DM vs HAR-IV": 0.4817,
+   "p-value": 0.63
+  },
+  "FuelGuard (HAR-IV + ML)": {
+   "MSE": 0.0531,
+   "QLIKE": 0.1614,
+   "R2 vs RW (%)": 29.0131,
+   "R2 vs HAR-IV (%)": 1.7235,
+   "R2 (%)": 75.7833,
+   "DM vs HAR-IV": -2.0434,
+   "p-value": 0.041
+  }
+ },
+ "n_oos": 80224,
+ "n_oos_diesel": 3724,
+ "markets_better": 20,
+ "markets_sig_better": 6,
+ "markets_sig_worse": 0,
+ "n_markets": 22,
+ "years_fg_better_all": 13,
+ "years_ens_better_all": 7,
+ "years_fg_better_diesel": 8,
+ "importance": {
+  "Implied vol level": 44.88,
+  "HAR (past realised vol)": 11.33,
+  "Volume & curve": 4.21,
+  "Market & calendar": 2.23,
+  "Returns & asymmetry": 1.63,
+  "Common risk factors": 0.77,
+  "Variance risk premium": 0.66,
+  "Implied vol smile": 0.62,
+  "Implied vol term structure": 0.32
+ },
+ "backtest": {
+  "Never lock (market)": {
+   "Mean %": 0.875,
+   "St.dev %": 6.575,
+   "CVaR95 %": 16.693,
+   "Worst %": 26.177,
+   "Months >5%": 38,
+   "Hedge ratio": 0.0,
+   "CVaR95 EUR/month": 2769.001,
+   "Saving EUR/yr": 0.0
+  },
+  "Always lock": {
+   "Mean %": 1.0,
+   "St.dev %": 0.0,
+   "CVaR95 %": 1.0,
+   "Worst %": 1.0,
+   "Months >5%": 0,
+   "Hedge ratio": 1.0,
+   "CVaR95 EUR/month": 248.68,
+   "Saving EUR/yr": -78.437
+  },
+  "Always 50%": {
+   "Mean %": 0.938,
+   "St.dev %": 3.287,
+   "CVaR95 %": 8.846,
+   "Worst %": 13.589,
+   "Months >5%": 15,
+   "Hedge ratio": 0.5,
+   "CVaR95 EUR/month": 1485.314,
+   "Saving EUR/yr": -39.218
+  },
+  "Random walk": {
+   "Mean %": 0.467,
+   "St.dev %": 3.188,
+   "CVaR95 %": 6.813,
+   "Worst %": 10.101,
+   "Months >5%": 10,
+   "Hedge ratio": 0.421,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 790.523
+  },
+  "HAR": {
+   "Mean %": 0.415,
+   "St.dev %": 3.258,
+   "CVaR95 %": 7.031,
+   "Worst %": 10.101,
+   "Months >5%": 11,
+   "Hedge ratio": 0.413,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 894.573
+  },
+  "HAR-IV": {
+   "Mean %": 0.352,
+   "St.dev %": 3.233,
+   "CVaR95 %": 6.85,
+   "Worst %": 10.101,
+   "Months >5%": 9,
+   "Hedge ratio": 0.402,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 980.321
+  },
+  "Implied vol": {
+   "Mean %": 0.493,
+   "St.dev %": 2.845,
+   "CVaR95 %": 5.995,
+   "Worst %": 10.101,
+   "Months >5%": 7,
+   "Hedge ratio": 0.508,
+   "CVaR95 EUR/month": 821.527,
+   "Saving EUR/yr": 750.33
+  },
+  "Lasso": {
+   "Mean %": 0.456,
+   "St.dev %": 3.074,
+   "CVaR95 %": 6.589,
+   "Worst %": 10.101,
+   "Months >5%": 8,
+   "Hedge ratio": 0.416,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 791.029
+  },
+  "Random forest": {
+   "Mean %": 0.401,
+   "St.dev %": 3.122,
+   "CVaR95 %": 6.713,
+   "Worst %": 10.101,
+   "Months >5%": 9,
+   "Hedge ratio": 0.399,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 897.478
+  },
+  "Gradient boosting": {
+   "Mean %": 0.329,
+   "St.dev %": 3.269,
+   "CVaR95 %": 6.668,
+   "Worst %": 10.101,
+   "Months >5%": 8,
+   "Hedge ratio": 0.404,
+   "CVaR95 EUR/month": 900.306,
+   "Saving EUR/yr": 943.522
+  },
+  "Neural network": {
+   "Mean %": 0.274,
+   "St.dev %": 3.459,
+   "CVaR95 %": 6.768,
+   "Worst %": 10.101,
+   "Months >5%": 9,
+   "Hedge ratio": 0.39,
+   "CVaR95 EUR/month": 941.159,
+   "Saving EUR/yr": 1022.477
+  },
+  "ML ensemble": {
+   "Mean %": 0.389,
+   "St.dev %": 3.115,
+   "CVaR95 %": 6.589,
+   "Worst %": 10.101,
+   "Months >5%": 8,
+   "Hedge ratio": 0.407,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 878.379
+  },
+  "FuelGuard (HAR-IV + ML)": {
+   "Mean %": 0.366,
+   "St.dev %": 3.147,
+   "CVaR95 %": 6.589,
+   "Worst %": 10.101,
+   "Months >5%": 8,
+   "Hedge ratio": 0.402,
+   "CVaR95 EUR/month": 913.621,
+   "Saving EUR/yr": 920.046
+  }
+ },
+ "backtest_months": 178,
+ "var_coverage": {
+  "Random walk": {
+   "N": 178,
+   "breaches": 13,
+   "rate %": 7.303,
+   "Kupiec p": 0.186,
+   "avg 95% bound %": 8.978,
+   "daily rate %": 7.577
+  },
+  "HAR": {
+   "N": 178,
+   "breaches": 14,
+   "rate %": 7.865,
+   "Kupiec p": 0.104,
+   "avg 95% bound %": 8.699,
+   "daily rate %": 7.953
+  },
+  "HAR-IV": {
+   "N": 178,
+   "breaches": 14,
+   "rate %": 7.865,
+   "Kupiec p": 0.104,
+   "avg 95% bound %": 8.439,
+   "daily rate %": 8.221
+  },
+  "Implied vol": {
+   "N": 178,
+   "breaches": 10,
+   "rate %": 5.618,
+   "Kupiec p": 0.71,
+   "avg 95% bound %": 9.268,
+   "daily rate %": 6.448
+  },
+  "Lasso": {
+   "N": 178,
+   "breaches": 16,
+   "rate %": 8.989,
+   "Kupiec p": 0.027,
+   "avg 95% bound %": 8.479,
+   "daily rate %": 8.463
+  },
+  "Random forest": {
+   "N": 178,
+   "breaches": 16,
+   "rate %": 8.989,
+   "Kupiec p": 0.027,
+   "avg 95% bound %": 8.407,
+   "daily rate %": 8.49
+  },
+  "Gradient boosting": {
+   "N": 178,
+   "breaches": 16,
+   "rate %": 8.989,
+   "Kupiec p": 0.027,
+   "avg 95% bound %": 8.47,
+   "daily rate %": 8.759
+  },
+  "Neural network": {
+   "N": 178,
+   "breaches": 14,
+   "rate %": 7.865,
+   "Kupiec p": 0.104,
+   "avg 95% bound %": 8.35,
+   "daily rate %": 8.544
+  },
+  "ML ensemble": {
+   "N": 178,
+   "breaches": 16,
+   "rate %": 8.989,
+   "Kupiec p": 0.027,
+   "avg 95% bound %": 8.449,
+   "daily rate %": 8.49
+  },
+  "FuelGuard (HAR-IV + ML)": {
+   "N": 178,
+   "breaches": 14,
+   "rate %": 7.865,
+   "Kupiec p": 0.104,
+   "avg 95% bound %": 8.441,
+   "daily rate %": 8.409
+  }
+ }
+}

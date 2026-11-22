@@ -1,0 +1,15 @@
+\begin{tabular}{lrrrrrr}
+\toprule
+Model & R2 vs RW (\%) & R2 vs HAR-IV (\%) & MSE & QLIKE & DM vs HAR-IV & p-value \\
+\midrule
+Random walk & 0.0 & -54.8 & 0.0843 & 0.2171 & 14.21 & 0.000 \\
+HAR & 15.2 & -31.2 & 0.0715 & 0.1815 & 14.98 & 0.000 \\
+HAR-IV & 35.4 & 0.0 & 0.0545 & 0.1396 & -- & -- \\
+Lasso & 34.3 & -1.6 & 0.0554 & 0.1442 & 1.43 & 0.152 \\
+Random forest & 34.4 & -1.6 & 0.0554 & 0.1457 & 1.52 & 0.128 \\
+Gradient boosting & 33.9 & -2.4 & 0.0558 & 0.1475 & 1.92 & 0.054 \\
+Neural network & 15.2 & -31.3 & 0.0716 & 0.1822 & 12.39 & 0.000 \\
+ML ensemble & 35.3 & -0.2 & 0.0546 & 0.1435 & 0.14 & 0.888 \\
+\textbf{FuelGuard (HAR-IV + ML)} & \textbf{36.9} & \textbf{2.3} & \textbf{0.0532} & \textbf{0.1386} & \textbf{-4.77} & \textbf{0.000} \\
+\bottomrule
+\end{tabular}

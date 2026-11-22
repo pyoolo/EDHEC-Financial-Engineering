@@ -1,0 +1,61 @@
+year,model,params,cv_mse,n_train
+2012,Lasso,{'lasso__alpha': 0.01},0.0462888083203488,5312
+2012,Random forest,"{'max_depth': 6, 'min_samples_leaf': 20}",0.04682089439713277,5312
+2012,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.05355001596665352,5312
+2012,Neural network,{'mlpregressor__alpha': 0.0001},0.0793396795285537,5312
+2013,Lasso,{'lasso__alpha': 0.01},0.04118413045436919,6420
+2013,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04135239922746032,6420
+2013,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.0423973658063232,6420
+2013,Neural network,{'mlpregressor__alpha': 0.0001},0.06043620260188315,6420
+2014,Lasso,{'lasso__alpha': 0.01},0.04454697864101468,7515
+2014,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04360813133445157,7515
+2014,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.04600788960509242,7515
+2014,Neural network,{'mlpregressor__alpha': 0.0001},0.07507746887398624,7515
+2015,Lasso,{'lasso__alpha': 0.01},0.04620190942062057,8612
+2015,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04507561724486139,8612
+2015,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.04843122329030348,8612
+2015,Neural network,{'mlpregressor__alpha': 0.0001},0.07722788241242122,8612
+2016,Lasso,{'lasso__alpha': 0.01},0.04537613312593696,9714
+2016,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04443158200641694,9714
+2016,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.04705791455378391,9714
+2016,Neural network,{'mlpregressor__alpha': 0.01},0.06997750885527236,9714
+2017,Lasso,{'lasso__alpha': 0.01},0.04830705340971623,10818
+2017,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.046891823348748196,10818
+2017,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.049678406047657477,10818
+2017,Neural network,{'mlpregressor__alpha': 0.01},0.06857302417154938,10818
+2018,Lasso,{'lasso__alpha': 0.01},0.04643370756868636,11904
+2018,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04510090767146117,11904
+2018,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.0456555122940556,11904
+2018,Neural network,{'mlpregressor__alpha': 0.0001},0.06421608382058046,11904
+2019,Lasso,{'lasso__alpha': 0.001},0.046987056464244226,12991
+2019,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04627916667295689,12991
+2019,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.04641529813907702,12991
+2019,Neural network,{'mlpregressor__alpha': 0.01},0.05899836642663372,12991
+2020,Lasso,{'lasso__alpha': 0.001},0.047002735509632944,14062
+2020,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.04623773098887629,14062
+2020,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.04625271341161156,14062
+2020,Neural network,{'mlpregressor__alpha': 0.0001},0.06003803415547662,14062
+2021,Lasso,{'lasso__alpha': 0.001},0.05562593427571185,15145
+2021,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.05631975706294989,15145
+2021,Gradient boosting,"{'max_depth': 3, 'max_iter': 500}",0.05505201399819356,15145
+2021,Neural network,{'mlpregressor__alpha': 0.01},0.07240958626843448,15145
+2022,Lasso,{'lasso__alpha': 0.0001},0.05640542100171553,16231
+2022,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.05743934923095514,16231
+2022,Gradient boosting,"{'max_depth': 3, 'max_iter': 500}",0.05629110087941135,16231
+2022,Neural network,{'mlpregressor__alpha': 0.0001},0.06786447356380056,16231
+2023,Lasso,{'lasso__alpha': 0.001},0.05980808973259775,17327
+2023,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.06072964354392344,17327
+2023,Gradient boosting,"{'max_depth': 3, 'max_iter': 200}",0.06052998155848129,17327
+2023,Neural network,{'mlpregressor__alpha': 0.0001},0.07346046327127308,17327
+2024,Lasso,{'lasso__alpha': 0.001},0.05857959212627286,18404
+2024,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.05933270727810119,18404
+2024,Gradient boosting,"{'max_depth': 5, 'max_iter': 200}",0.05907025152833856,18404
+2024,Neural network,{'mlpregressor__alpha': 0.01},0.07260815641643244,18404
+2025,Lasso,{'lasso__alpha': 0.001},0.05657121895649595,19459
+2025,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.05693737412315721,19459
+2025,Gradient boosting,"{'max_depth': 3, 'max_iter': 500}",0.0568246636387487,19459
+2025,Neural network,{'mlpregressor__alpha': 0.01},0.07080123136869433,19459
+2026,Lasso,{'lasso__alpha': 0.001},0.05915363491527894,20520
+2026,Random forest,"{'max_depth': 12, 'min_samples_leaf': 20}",0.06014313202334367,20520
+2026,Gradient boosting,"{'max_depth': 3, 'max_iter': 500}",0.05953669937913014,20520
+2026,Neural network,{'mlpregressor__alpha': 0.0001},0.07570067743080303,20520

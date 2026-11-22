@@ -1,0 +1,30 @@
+\section{Data dictionary}\label{app:data}
+
+\begin{sloppypar}
+\paragraph{Futures panel (FuelGuard 2.0).} Source: Bloomberg terminal, \texttt{BDH} formulas, downloaded
+17--19 November 2026. Fields per market: \texttt{PX\_SETTLE}, \texttt{PX\_OPEN}, \texttt{PX\_HIGH},
+\texttt{PX\_LOW}, \texttt{PX\_VOLUME} of the first generic contract, \texttt{PX\_SETTLE} of the second, and
+\texttt{30DAY\_IMPVOL\_x\%MNY\_DF} for $x\in\{90,95,97.5,100,102.5,105,110\}$ plus
+\texttt{1ST\_MTH\_IMPVOL\_100.0\%MNY\_DF} and \texttt{2ND\_MTH\_IMPVOL\_100.0\%MNY\_DF}. Common series:
+VIX, VIX3M (\texttt{PX\_LAST}) and VSTOXX (V2X).
+\end{sloppypar}
+
+\begin{table}[H]
+\centering\scriptsize
+\fittable{\tabdir/vol_markets.tex}
+\caption{The 22 markets: market-days with a target, median and 95th percentile of realised volatility
+(Garman--Klass, next 21 days, annualised) and median 30-day implied volatility. Government-bond volatilities
+are price volatilities.}
+\label{tab:markets}
+\end{table}
+
+\paragraph{Diesel cost series (FuelGuard 1.0 and backtest).} The 21 daily series of Appendix~\ref{app:v1}
+(Table~\ref{tab:v1raw}) and the ECB euro reference rate (USD per EUR), used to express diesel in EUR/litre
+(1 gallon = 3.785 litres).
+
+\begin{table}[H]
+\centering\scriptsize
+\fittable{\tabdir/descriptive_raw.tex}
+\caption{Raw series of FuelGuard 1.0 and the derived diesel price.}
+\label{tab:v1raw}
+\end{table}

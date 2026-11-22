@@ -1,0 +1,5 @@
+model,Most frequent choice (years)
+Gradient boosting,"max_depth: 3, max_iter: 200 (10/15)"
+Lasso,alpha: 0.01 (7/15)
+Neural network,alpha: 0.0001 (9/15)
+Random forest,"max_depth: 12, min_samples_leaf: 20 (14/15)"

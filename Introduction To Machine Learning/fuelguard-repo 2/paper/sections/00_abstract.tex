@@ -1,0 +1,15 @@
+\begin{abstract}
+\noindent Small Italian hauliers spend around 30\% of their costs on diesel and cannot absorb shocks such
+as the +32\% monthly jump of March 2022. FuelGuard is a monthly signal, offered by a bank to its SME transport
+clients, that forecasts next month's diesel volatility and turns it into a hedge ratio and a 95\%
+worst-case cost. A first attempt to predict price spikes directly showed that the direction of diesel prices is
+essentially unpredictable; following the volatility-forecasting literature, FuelGuard~2.0 forecasts
+\emph{risk} instead. We train Lasso, random forests, gradient boosting and a neural network on a panel of 22
+futures markets (Bloomberg, 2007--2026, 109\,000 market-days, 30 features including the implied-volatility
+smile) and compare them, in a purged walk-forward over 15 test years, with the random walk, HAR and HAR with
+implied volatility (HAR-IV). Machine learning alone matches but does not beat HAR-IV; the combination of
+HAR-IV with a scale-free ML ensemble, chosen on a separate validation period, reduces the forecast error by
+2.3\% (Diebold--Mariano $p<0.001$), by 26\% against HAR and by 37\% against the random walk, and improves
+on HAR-IV in 20 of 22 markets and 13 of 15 years. For diesel, volatility-driven hedging cuts the average cost
+of the worst 5\% of months from 16.7\% to 6.6\% above the lockable price while lowering the average cost.
+\end{abstract}

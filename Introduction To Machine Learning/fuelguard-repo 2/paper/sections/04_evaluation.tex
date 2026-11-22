@@ -1,0 +1,33 @@
+\section{Evaluation design}\label{sec:evaluation}
+
+\paragraph{Walk-forward with purging and embargo.} For each test year $Y=2012,\dots,2026$, every model is
+re-estimated on all market-days whose 21-day label is fully observed at least 30 calendar days before
+1~January of $Y$, and then forecasts every market-day of $Y$: 15 test years and \textbf{80\,224
+out-of-sample market-days} (3\,724 for diesel), covering the 2014--16 oil crash, Covid, the 2022 energy crisis
+and 2026. HAR and HAR-IV are re-estimated per market on all training days. The ML models train on every fifth
+day of each market (labels overlap over 21 days, so consecutive days add little information; this also
+divides the cost by five) and choose their hyper-parameters by a three-fold \emph{purged} cross-validation
+inside the training window (the most recent 15\% blocks of dates, with the same 30-day gap). Automated tests
+check that training labels end before the test year and that features never use future prices
+(Appendix~\ref{app:theory}, A.6).
+
+\paragraph{Statistical metrics.} Mean squared error of the log volatility and QLIKE \citep{patton2011};
+the out-of-sample $R^2$ relative to a benchmark $b$, $R^2_{OS}=1-\sum(y-\hat y)^2/\sum(y-\hat y_b)^2$
+(positive values mean the model beats $b$); and Diebold--Mariano tests against HAR-IV. For the pooled test we
+average the loss differential across markets each day and use Newey--West errors with 21 lags; we also test
+each market separately.
+
+\paragraph{From volatility to the hedging decision.} The haulier gets two numbers each month:
+\begin{enumerate}
+\item \textbf{A hedge ratio.} On the first trading day of each month, FuelGuard locks 100\% of next month's
+diesel if forecast volatility is above the 75th percentile of diesel's historical volatility, 50\% if it is
+above the median, and 0\% otherwise; both percentiles use data before the test year only. The same rule is
+applied to every forecast, so differences come from the forecast alone. Costs are measured as in
+Appendix~\ref{app:v1}: overrun $c_t/P_t-1$ of the monthly cost over the price lockable at decision time,
+with a 1\% hedging margin, 178 monthly decisions from January 2012 to October 2026.
+\item \textbf{A 95\% worst case.} If prices follow a random walk with forecast volatility $\hat\sigma$, the
+premium of the monthly average price over the price locked at $t+1$ has standard deviation
+$\hat\sigma\sqrt{(n+1)(2n+1)/(6n)/252}$ with $n=21$, about $\hat\sigma\sqrt{7.5/252}$. The 95\% bound is
+$1.645$ times this. We count how often the realised premium exceeds it (5\% expected) and apply the
+\citet{kupiec1995} test.
+\end{enumerate}

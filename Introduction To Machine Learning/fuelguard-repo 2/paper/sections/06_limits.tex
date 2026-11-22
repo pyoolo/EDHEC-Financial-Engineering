@@ -1,0 +1,35 @@
+\section{Limits and what we cannot claim}\label{sec:limits}
+
+\begin{itemize}
+\item \textbf{FuelGuard forecasts risk, not prices.} It cannot tell whether diesel will rise or fall; it
+reduces the cost of bad months, it does not promise cheaper fuel on average (Appendix~\ref{app:v1}).
+\item \textbf{The ML gain over the best benchmark is small.} 2.3\% across markets, significant; 0.7\% and
+not significant for diesel. Most of the forecasting power comes from implied volatility, which the market
+provides for free. Machine learning alone does not beat HAR-IV; it adds value in combination.
+\item \textbf{Economic differences between forecasts are not significant.} In the hedging backtest, any
+reasonable volatility forecast delivers most of the benefit; we cannot claim that FuelGuard's ranking above
+HAR-IV in Figure~\ref{fig:backtest} would persist.
+\item \textbf{Design choices after a first run.} The scale-free design and the combination were selected on
+a 2010--2011 validation period after a first test run had shown raw ML losing to HAR-IV (Section~\ref{sec:methods}).
+The validation period precedes every test year, but our first run had already seen the test years.
+\item \textbf{Data.} US diesel futures, not ICE Gasoil; wholesale prices, so taxes (over half of the pump
+price) and the basis to the haulier's supplier are ignored; overnight moves are missing from the realised
+volatility target; the hedging margin is assumed (results are similar at 0\% and 2\%).
+\item \textbf{Shocks from calm markets.} When a spike starts in a quiet market (2023, early 2026),
+volatility forecasts react only after the first move.
+\end{itemize}
+
+\paragraph{With more time.} Use ICE Gasoil and a supplier price series; add intraday data for a full
+realised variance; let the model learn the decision thresholds on validation data with a cost--CVaR
+objective; forecast quantiles of the premium directly (quantile gradient boosting); calibrate the 95\%
+bound; and add fundamentals (distillate inventories, refinery outages) and news indicators.
+
+\section{Conclusion}
+
+Machine learning could not predict the direction of diesel prices, and no honest product should claim it
+can. It can, however, help forecast \emph{risk}. Pooling 22 futures markets with scale-free features and
+combining the ML ensemble with the best econometric benchmark gives a small but statistically robust
+improvement over HAR-IV, consistent across markets and years. For a small haulier, a hedge driven by forecast
+volatility cuts the cost of the worst months by about 60\% at no extra average cost. The main lessons are
+methodological: choose a target the data can predict, beat the right benchmark, pool data to give flexible
+models enough observations, and choose designs on validation data, never on the test set.

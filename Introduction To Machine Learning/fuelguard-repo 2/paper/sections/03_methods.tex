@@ -1,0 +1,40 @@
+\section{Methods}\label{sec:methods}
+
+\paragraph{Learning problem.} We estimate $m(x_{it})=\E[y_{it}\mid x_{it}]$ for market $i$ and day $t$
+by minimising the squared error of the log volatility, a loss that ranks volatility forecasts consistently
+even though realised volatility is only a noisy proxy of the true one \citep{patton2011}.
+
+\paragraph{Benchmarks (what the product must beat).} (1) \emph{Random walk}: next month's volatility equals
+the last month's. (2) \emph{HAR} \citep{corsi2009}, estimated by OLS separately for each market on its
+training window: $y_{it}=\beta_{0i}+\beta_{di}\ln\sigma^{(1)}_{it}+\beta_{wi}\ln\sigma^{(5)}_{it}
++\beta_{mi}\ln\sigma^{(22)}_{it}+\varepsilon_{it}$, the standard benchmark of the volatility literature.
+(3) \emph{HAR-IV}: HAR plus the log implied volatility, the market's own forecast. HAR-IV is linear, has five
+parameters per market and is very hard to beat; it assumes that the relation between past, implied and
+future volatility is linear in logs and stable within each market.
+
+\paragraph{Machine-learning models (pooled across the 22 markets).} Pooling multiplies the sample by 22
+and lets a model learn patterns common to all futures markets \citep{gu2020}, at the price of
+heterogeneity, which the scale-free inputs remove. All models predict the change in log volatility.
+\begin{itemize}
+\item \textbf{Lasso}: linear in the 30 features with an $L_1$ penalty $\alpha\in\{10^{-4},10^{-3},10^{-2}\}$,
+which selects variables. Assumes linearity and additivity; needs standardised inputs.
+\item \textbf{Random forest}: 300 trees on 50\% subsamples with a third of the features tried at each split;
+depth $\{6,12\}$, minimum leaf $\{20,100\}$. Captures non-linearities and interactions (e.g.\ a high variance
+risk premium matters more when VIX is high); no extrapolation beyond the training range.
+\item \textbf{Gradient boosting}: shallow trees fitted sequentially to the residuals, learning rate 0.05;
+number of trees $\{200,500\}$, depth $\{3,5\}$.
+\item \textbf{Neural network}: a two-layer perceptron (64 and 32 ReLU units), Adam, early stopping, weight
+penalty $\alpha\in\{10^{-4},10^{-2}\}$; the most flexible model and the one that needs the most data.
+\item \textbf{ML ensemble}: the equal-weight mean of Lasso, random forest and boosting.
+\item \textbf{FuelGuard} (the product): the equal-weight mean of HAR-IV and the ML ensemble, combining an
+econometric model that knows each market's level with ML models that learn common non-linear dynamics.
+\end{itemize}
+Appendix~\ref{app:theory} explains each method and its assumptions.
+
+\paragraph{How the design was chosen.} A first run with ML models on raw (not scale-free) features lost to
+HAR-IV. To change the design \emph{without} looking at the test years, we compared alternatives on a separate
+\textbf{validation period, 2010--2011}, using only labels known before December 2009
+(\texttt{scripts/10\_validation\_design.py}, Table~\ref{tab:design} in Appendix~\ref{app:additional}). There,
+scale-free inputs beat raw ones for every model (e.g.\ random forest $-25\%\to-2\%$ against HAR-IV), the
+neural network overfitted in every variant (so it is reported but not in the ensemble), and combining the ML
+ensemble with HAR-IV gave the lowest error ($+4.5\%$). These choices were then frozen.

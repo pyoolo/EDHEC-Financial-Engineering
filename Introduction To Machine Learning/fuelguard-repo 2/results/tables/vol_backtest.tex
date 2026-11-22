@@ -1,0 +1,19 @@
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Strategy & Mean \% & St.dev \% & CVaR95 \% & Worst \% & Months >5\% & Hedge ratio & CVaR95 EUR/month & Saving EUR/yr \\
+\midrule
+Never lock (market) & 0.88 & 6.57 & 16.7 & 26.2 & 38 & 0.00 & 2,769 & 0 \\
+Always lock & 1.00 & 0.00 & 1.0 & 1.0 & 0 & 1.00 & 249 & -78 \\
+Always 50\% & 0.94 & 3.29 & 8.8 & 13.6 & 15 & 0.50 & 1,485 & -39 \\
+Random walk & 0.47 & 3.19 & 6.8 & 10.1 & 10 & 0.42 & 914 & 791 \\
+HAR & 0.41 & 3.26 & 7.0 & 10.1 & 11 & 0.41 & 914 & 895 \\
+HAR-IV & 0.35 & 3.23 & 6.9 & 10.1 & 9 & 0.40 & 914 & 980 \\
+Implied vol & 0.49 & 2.84 & 6.0 & 10.1 & 7 & 0.51 & 822 & 750 \\
+Lasso & 0.46 & 3.07 & 6.6 & 10.1 & 8 & 0.42 & 914 & 791 \\
+Random forest & 0.40 & 3.12 & 6.7 & 10.1 & 9 & 0.40 & 914 & 897 \\
+Gradient boosting & 0.33 & 3.27 & 6.7 & 10.1 & 8 & 0.40 & 900 & 944 \\
+Neural network & 0.27 & 3.46 & 6.8 & 10.1 & 9 & 0.39 & 941 & 1,022 \\
+ML ensemble & 0.39 & 3.12 & 6.6 & 10.1 & 8 & 0.41 & 914 & 878 \\
+\textbf{FuelGuard (HAR-IV + ML)} & \textbf{0.37} & \textbf{3.15} & \textbf{6.6} & \textbf{10.1} & \textbf{8} & \textbf{0.40} & \textbf{914} & \textbf{920} \\
+\bottomrule
+\end{tabular}

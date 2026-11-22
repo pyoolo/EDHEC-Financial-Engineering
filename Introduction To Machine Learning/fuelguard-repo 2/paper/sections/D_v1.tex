@@ -1,0 +1,34 @@
+\section{First attempt: predicting price spikes (FuelGuard 1.0)}\label{app:v1}
+
+Our first design asked machine learning to predict the \emph{price} directly. It is reported here because
+its failure motivated the final product, and because the guidelines ask what the product cannot do.
+
+\paragraph{Set-up.} Daily decisions on NYMEX diesel trading days, January 2008 -- October 2026 (4\,701
+days), 21 raw series (diesel, Brent, WTI and gas futures for two maturities; diesel and Brent implied
+volatility; copper, gold, 10-year Treasury futures; VIX and VIX3M; S\&P~500 and energy indices; US and euro
+inflation expectations; ECB EUR/USD) and 57 engineered features. A decision at the close of $t$ is executed
+at the settlement of $t+1$. The \emph{market cost} $M_t$ is the average diesel price in EUR/litre over
+$t+2,\dots,t+22$; the \emph{lockable price} $P_t$ is a strip of first- and second-month futures settled at
+$t+1$, each day priced with the contract that will be front month on that day (generic contracts roll on
+the first trading day of the month; comparing different delivery months would create a spurious gain from
+locking, a mistake our very first analysis made). Targets: the premium $R_t=M_t/P_t-1$ (regression) and a
+\emph{spike} $\1\{R_t>5\%\}$ (classification, 19\% of days). Models: $L_2$-logistic and ridge, random forest,
+gradient boosting, in the same purged expanding walk-forward (2012--2026). These $M_t$ and $P_t$ are reused
+by the FuelGuard~2.0 backtest.
+
+\paragraph{Results.} The premium was not predictable: the best out-of-sample $R^2$ against the futures price
+was 0.5\%, no Diebold--Mariano test was significant, and cross-validation always chose the strongest ridge
+penalty, i.e.\ a constant. Spikes were predictable only modestly (Table~\ref{tab:v1}): AUC 0.59--0.64 for the
+57-feature models, positive Brier skill only for the random forest, while ranking days by diesel implied
+volatility alone gave an AUC of 0.71. Skill collapsed in 2023 and 2026, when spikes started from calm
+markets. In the hedging backtest a simple rule ``lock when implied volatility is above its median''
+beat every classifier. The lesson: the predictable part of the problem is \emph{volatility}, not direction,
+which led to FuelGuard~2.0.
+
+\begin{table}[H]
+\centering\small
+\fittable{\tabdir/classification_oos.tex}
+\caption{FuelGuard 1.0, spike classification out of sample 2012--2026 (3\,725 days). The one-feature
+implied-volatility logistic was added after a first run. Last row: days ranked by implied volatility, no model.}
+\label{tab:v1}
+\end{table}

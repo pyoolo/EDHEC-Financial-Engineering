@@ -1,0 +1,33 @@
+\section{The product}\label{sec:product}
+
+\paragraph{Who uses it.} Road haulage in Italy is dominated by very small firms: the typical
+\emph{autotrasportatore} runs a handful of trucks. Diesel is one of their largest costs, typically around
+30\% of operating costs, and their margins are a few percent of revenue. A ten-truck firm burns about
+25\,000 litres a month; in our data the wholesale price rose by 32\% in a single month in March 2022
+(about 5\,000~EUR on a month's fuel bill) and by 60\% in March 2026. These firms do not trade futures, but
+they can ask their fuel supplier or their bank for a fixed price for next month. The question they cannot
+answer is \emph{when} fixing is worth its cost (we assume a 1\% margin over the futures price).
+
+\paragraph{The client.} We pitch FuelGuard to a \textbf{bank with SME loans to transport firms}. Fuel
+shocks are a credit-risk driver for these borrowers, and the bank can sell fixed-price fuel or simple
+swaps. Each month FuelGuard gives the bank, for each client, two numbers it can pass on through its
+relationship managers or app:
+\begin{enumerate}
+\item a \textbf{hedge ratio} (0\%, 50\% or 100\% of next month's diesel), and
+\item a \textbf{95\% worst case}: ``next month, there is a 5\% chance that your diesel will cost more than
+X\% above the price you can fix today''.
+\end{enumerate}
+
+\paragraph{The prediction.} Both numbers come from one machine-learning task: a \textbf{regression of next
+month's realised volatility} of diesel futures. Our first design tried to predict the price itself, or
+whether it would jump by more than 5\%. Out of sample, the size of next month's price move could not be
+predicted beyond the futures price, and the modest skill in predicting jumps came almost entirely from
+implied volatility (Appendix~\ref{app:v1}). Following the literature, which finds that volatility is
+persistent and predictable while price changes are not \citep{corsi2009,christensen2023,degiannakis2017},
+FuelGuard~2.0 forecasts \emph{how much} the price will move, not in which direction. For a hedger this is
+the relevant quantity: the risk of a costly month grows with volatility.
+
+\paragraph{What it replaces (benchmarks).} The haulier's current practice (never fix, always fix, fix half)
+for the decision; and, for the forecast, the three models a risk desk would use today: last month's
+volatility (random walk), the HAR model of \citet{corsi2009}, and HAR augmented with the option-implied
+volatility (HAR-IV), the market's own forecast. HAR-IV is the bar the machine-learning models must clear.

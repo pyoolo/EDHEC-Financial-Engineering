@@ -1,0 +1,23 @@
+\begin{tabular}{llrr}
+\toprule
+Design & model & MSE & vs HAR-IV (\%) \\
+\midrule
+HAR-IV (benchmark) &  & 0.0463 & +0.0 \\
+raw & Lasso & 0.0473 & -2.0 \\
+hybrid (residual of HAR-IV) & Lasso & 0.0465 & -0.3 \\
+relative & Lasso & 0.0467 & -0.7 \\
+raw & Random forest & 0.0581 & -25.3 \\
+hybrid (residual of HAR-IV) & Random forest & 0.0464 & -0.1 \\
+relative & Random forest & 0.0471 & -1.6 \\
+raw & Gradient boosting & 0.0543 & -17.1 \\
+hybrid (residual of HAR-IV) & Gradient boosting & 0.0479 & -3.2 \\
+relative & Gradient boosting & 0.0462 & +0.3 \\
+raw & Neural network & 0.0764 & -64.8 \\
+hybrid (residual of HAR-IV) & Neural network & 0.0635 & -37.0 \\
+relative & Neural network & 0.0768 & -65.7 \\
+raw & ML ensemble (Lasso, RF, GB) & 0.0489 & -5.4 \\
+raw + HAR-IV (equal weights) & ML ensemble (Lasso, RF, GB) & 0.0460 & +0.7 \\
+relative & ML ensemble (Lasso, RF, GB) & 0.0451 & +2.7 \\
+relative + HAR-IV (equal weights) & ML ensemble (Lasso, RF, GB) & 0.0443 & +4.5 \\
+\bottomrule
+\end{tabular}
